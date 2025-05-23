@@ -10,6 +10,12 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        cOrange: "#FD5C02",
+        cBlack: "#1A1A1A",  
+        cLightOrange: "#FFBF9B",
+        cWhite: "#FFF9F6",
+        cGray: "#667085",
+        cPink: "#FC52E4",
       },
     },
   },
