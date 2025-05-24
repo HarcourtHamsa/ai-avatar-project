@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { EyeIcon, EyeOffIcon } from 'lucide-react'; // or use react-icons
+import { EyeIcon, EyeOffIcon } from 'lucide-react'; 
 
 const Input = ({
   label,

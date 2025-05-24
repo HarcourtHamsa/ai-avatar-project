@@ -1,5 +1,9 @@
-// import { Geist, Geist_Mono } from "next/font/google";
+import { Karla } from "next/font/google";
 import "./globals.css";
+
+const font = Karla({
+  weight: "400",
+});
 
 export const metadata = {
   title: "AI avatar project",
@@ -9,7 +13,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`antialiased`}>{children}</body>
+      <body className={`${font.className} antialiased`}>{children}</body>
     </html>
   );
 }
