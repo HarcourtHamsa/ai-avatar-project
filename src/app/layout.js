@@ -3,6 +3,7 @@ import "./globals.css";
 
 const font = Karla({
   weight: "400",
+  subsets: ["latin"],
 });
 
 export const metadata = {
