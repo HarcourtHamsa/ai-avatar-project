@@ -7,6 +7,7 @@ const Button = ({
   theme = "primary",
   isLoading = false,
   disabled,
+  icon,
   ...rest
 }) => {
   const baseStyles =
@@ -37,6 +38,9 @@ const Button = ({
       ) : (
         label
       )}
+
+      {/* Icon */}
+      {icon && <span className="ml-2">{icon}</span>}
     </button>
   );
 };

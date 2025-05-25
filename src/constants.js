@@ -1,12 +1,12 @@
 export class Routes {
   static dashboard = "/dashboard";
-  static projects = "/dashboard/projects"
-  static contests = "/dashboard/contests"
-  static creators = "/dashboard/creators"
-  static messages = "/dashboard/messages"
-  static transactions = "/dashboard/transactions"
-  static aiUgc = "/dashboard/ai-ugc"
+  static projects = "/dashboard/projects";
+  static contests = "/dashboard/contests";
+  static creators = "/dashboard/creators";
+  static messages = "/dashboard/messages";
+  static transactions = "/dashboard/transactions";
+  static aiUgc = "/dashboard/ai-ugc";
+  static newAiUgc = "/dashboard/ai-ugc/new";
 }
-
 
 export const ICON_SIZE = 20;

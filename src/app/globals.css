@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: "Satoshi Medium";
-  src: url("../assets/fonts/Satoshi-Medium.woff2");
+  src: url("../assets/fonts/Satoshi-Regular.woff2");
 }
 
 html,
@@ -19,7 +19,7 @@ body {
 }
 
 * {
-  /* font-family: "Satoshi Medium" !important; */
+  font-family: "Satoshi Medium" !important;
 }
 
 p {
