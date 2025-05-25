@@ -6,6 +6,7 @@ const Button = ({
   label,
   theme = "primary",
   isLoading = false,
+  className,
   disabled,
   ...rest
 }) => {
