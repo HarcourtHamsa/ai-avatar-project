@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { EyeIcon, EyeOffIcon } from 'lucide-react'; 
+import { useState } from "react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const Input = ({
   label,
   name,
-  type = 'text',
+  type = "text",
   value,
   onChange,
   required = false,
   ...rest
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === 'password';
-
-  const inputType = isPassword && showPassword ? 'text' : type;
+  const isPassword = type === "password";
+  const inputType = isPassword && showPassword ? "text" : type;
+  const isTextLike = ["text", "email", "password", "number", "search"].includes(
+    type
+  );
 
   return (
     <div className="relative">
@@ -31,7 +33,9 @@ const Input = ({
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+        className={`w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring focus:ring-cOrange ${
+          isTextLike ? "" : ""
+        }`}
         {...rest}
       />
       {isPassword && (
@@ -46,7 +50,6 @@ const Input = ({
       )}
     </div>
   );
-}
+};
 
-
-export default Input
+export default Input;

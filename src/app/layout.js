@@ -1,4 +1,4 @@
-import { Karla } from "next/font/google";
+import { Karla, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
 const font = Karla({
