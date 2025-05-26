@@ -1,49 +1,56 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import Button from './button'
-import GenerateHookModal from './GenerateHookModal'
-import ChooseBackgroundMusic from './ChooseBackgroundMusic'
-import { useRouter } from 'next/navigation'
-import Input from './input'
-import Spinner from './spinner'
-import SwitchToggle from './SwitchToggle'
+import React, { useState } from "react";
+import Button from "./button";
+import GenerateHookModal from "./GenerateHookModal";
+import ChooseBackgroundMusic from "./ChooseBackgroundMusic";
+import { useRouter } from "next/navigation";
+import Input from "./input";
+import Spinner from "./spinner";
+import SwitchToggle from "./SwitchToggle";
 
 const hookPlacementData = ["Top", "Center", "Bottom"];
-const HookDemoBuilderForm = ({isGeneratingVideo,setIsGeneratingVideo}) => {
-        const router = useRouter()
-      const [selectedHookPlacement, setSelectedHookPlacement] = useState("Center");
-      const [openGenerateHookModal,setOpenGenerateHookModal] = useState(false)
-      const [isEnabled, setIsEnabled] = useState(false);
-      const [formData, setFormData] = useState({
-        adTitle: "",
-      });
-    
-      const handleGenerateVideo = ()=>{
-        setIsGeneratingVideo(true)
-    
-        setTimeout(()=>{
-            router.push("/dashboard/ai-ugc")
-        },5000)
-      }
-    
-      const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-          ...prev,
-          [name]: value,
-        }));
-      };
+
+const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
+  const router = useRouter();
+  const [selectedHookPlacement, setSelectedHookPlacement] = useState("Center");
+  const [openGenerateHookModal, setOpenGenerateHookModal] = useState(false);
+  const [videoUrl, setVideoUrl] = useState(
+    "https://res.cloudinary.com/dgn6edv1k/video/upload/v1741272463/samples/cld-sample-video.mp4"
+  );
+  const [isEnabled, setIsEnabled] = useState(false);
+  const [formData, setFormData] = useState({
+    adTitle: "",
+  });
+
+  const handleGenerateVideo = () => {
+    setIsGeneratingVideo(true);
+    setTimeout(() => {
+      router.push("/dashboard/ai-ugc");
+    }, 5000);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
     <div>
-           <div className="border border-cOrange rounded-lg bg-white h-full px-8 py-10">
-        
-        {isGeneratingVideo && <div className="min-h-[500px] flex flex-col items-center gap-6">
-          <Spinner color="text-cOrange" size={200} />
-          <h2 className="text-3xl font-medium text-black text-center">Generating Video</h2>
-          </div>}
-  
-         {!isGeneratingVideo && <div className="border rounded-lg h-full px-8 py-10 flex items-start justify-between w-full gap-12">
+      <div className="border border-cOrange rounded-lg bg-white h-full px-4 sm:px-6 md:px-8 py-8 sm:py-10">
+        {isGeneratingVideo ? (
+          <div className="min-h-[500px] flex flex-col items-center gap-6">
+            <Spinner color="text-cOrange" size={200} />
+            <h2 className="text-3xl font-medium text-black text-center">
+              Generating Video
+            </h2>
+          </div>
+        ) : (
+          <div className="border rounded-lg h-full px-4 sm:px-6 md:px-8 py-8 sm:py-10 flex flex-col lg:flex-row items-start justify-between w-full gap-10 lg:gap-12">
+            {/* LEFT FORM */}
             <div className="flex-1 w-full flex flex-col gap-5 h-full">
               <Input
                 label="1. Ad Title"
@@ -53,10 +60,15 @@ const HookDemoBuilderForm = ({isGeneratingVideo,setIsGeneratingVideo}) => {
                 onChange={handleChange}
                 required
               />
+
+              {/* Hook Input */}
               <div className="w-full flex flex-col gap-2.5">
                 <div className="flex items-center justify-between w-full">
                   <h2 className="text-black font-medium text-sm">2. Hook</h2>
-                  <button onClick={()=>setOpenGenerateHookModal(true)} className="text-cOrange text-sm font-medium">
+                  <button
+                    onClick={() => setOpenGenerateHookModal(true)}
+                    className="text-cOrange text-sm font-medium"
+                  >
                     Generate Hook
                   </button>
                 </div>
@@ -65,11 +77,13 @@ const HookDemoBuilderForm = ({isGeneratingVideo,setIsGeneratingVideo}) => {
                   placeholder="Type an Attention Grabbing Hook that will show on the Avatar"
                 />
               </div>
+
+              {/* Hook Placement */}
               <div className="w-full flex flex-col gap-2.5">
                 <h2 className="text-black font-medium text-sm">
-                  3.Hook Placement
+                  3. Hook Placement
                 </h2>
-                <div className="flex items-center gap-2.5 w-full">
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2.5 w-full">
                   {hookPlacementData.map((placement, index) => (
                     <button
                       onClick={() => setSelectedHookPlacement(placement)}
@@ -81,7 +95,7 @@ const HookDemoBuilderForm = ({isGeneratingVideo,setIsGeneratingVideo}) => {
                       } rounded-xl py-2 px-4 flex items-center gap-2.5`}
                     >
                       <div
-                        className={` ${
+                        className={`${
                           selectedHookPlacement === placement
                             ? "bg-white"
                             : "border border-cGray"
@@ -92,7 +106,7 @@ const HookDemoBuilderForm = ({isGeneratingVideo,setIsGeneratingVideo}) => {
                           selectedHookPlacement === placement
                             ? "text-white"
                             : "text-cGray"
-                        } font-medium text-sm `}
+                        } font-medium text-sm`}
                       >
                         {placement}
                       </p>
@@ -100,54 +114,66 @@ const HookDemoBuilderForm = ({isGeneratingVideo,setIsGeneratingVideo}) => {
                   ))}
                 </div>
               </div>
-  
-              <div className="w-full flex flex-col gap-2.5 h-72">
+
+              {/* Demo Video Uploads */}
+              <div className="w-full flex flex-col gap-2.5 h-96 sm:h-fit">
                 <h2 className="text-black font-medium text-sm">
                   4. Demo Video
                 </h2>
-  
-                <div className="flex items-start gap-2.5 h-full">
-                  <div className="flex-1 border border-cGray/30 rounded-xl h-full flex flex-col items-center justify-center">
-                    <p className="text-sm text-cGray font-medium">
-                      Upload Demo Video
-                    </p>
-                  </div>
-                  <div className="flex-1 border border-cGray/30 rounded-xl h-full flex flex-col items-center justify-center">
-                    <p className="text-sm text-cGray font-medium">
-                      Upload Demo Video
-                    </p>
-                  </div>
-                  <div className="flex-1 border border-cGray/30 rounded-xl h-full flex flex-col items-center justify-center">
-                    <p className="text-sm text-cGray font-medium">
-                      Upload Demo Video
-                    </p>
-                  </div>
+                <div className="flex flex-col sm:flex-row items-stretch h-full gap-2.5 w-full">
+                  {[1, 2, 3].map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="flex-1 border border-cGray/30 rounded-xl h-36 sm:h-48 flex flex-col items-center justify-center"
+                    >
+                      <p className="text-sm text-cGray font-medium">
+                        Upload Demo Video
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
-  
+
+              {/* Background Music */}
               <div className="w-full flex flex-col gap-2.5">
                 <h2 className="text-black font-medium text-sm">
-                  5.Background Music{" "}
+                  5. Background Music{" "}
                   <span className="text-cGray">(Optional)</span>
                 </h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-cGray font-medium text-sm">
                     Add Background Music to video?
                   </h2>
-                  <SwitchToggle enabled={isEnabled} onToggle={() => setIsEnabled(!isEnabled)} />
+                  <SwitchToggle
+                    enabled={isEnabled}
+                    onToggle={() => setIsEnabled(!isEnabled)}
+                  />
                 </div>
               </div>
             </div>
-            <div className="flex-1 border-4 border-cOrange min-h-[700px] rounded-xl flex-col items-stretch justify-between"></div>
-          </div>}
-        </div>
-      
-  
-       
-    {openGenerateHookModal &&  <GenerateHookModal onClose={()=>setOpenGenerateHookModal(false)} />}
-     {isEnabled && <ChooseBackgroundMusic onClose={()=>setIsEnabled(false)} />}
-    </div>
-  )
-}
 
-export default HookDemoBuilderForm
+            {/* RIGHT PREVIEW PANEL */}
+            <div className="flex-1 w-full lg:min-h-[700px] border-4 border-cOrange rounded-xl flex items-center justify-center">
+              <video
+                src={videoUrl}
+                autoPlay
+                controls
+                className="w-full h-auto rounded-md object-cover"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {openGenerateHookModal && (
+        <GenerateHookModal onClose={() => setOpenGenerateHookModal(false)} />
+      )}
+      {isEnabled && (
+        <ChooseBackgroundMusic onClose={() => setIsEnabled(false)} />
+      )}
+    </div>
+  );
+};
+
+export default HookDemoBuilderForm;

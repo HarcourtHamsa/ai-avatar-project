@@ -77,7 +77,7 @@ const DashboardLayout = ({ children, label }) => {
         {
             label: "Settings",
             icon: <Settings size={ICON_SIZE} />,
-            path: "/settings",
+            path: "/dashboard/settings",
         },
         {
             label: "Help & Support",

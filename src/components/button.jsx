@@ -8,6 +8,7 @@ const Button = ({
   isLoading = false,
   className,
   disabled,
+  icon,
   ...rest
 }) => {
   const baseStyles =
@@ -38,6 +39,7 @@ const Button = ({
       ) : (
         label
       )}
+      {icon}
     </button>
   );
 };
