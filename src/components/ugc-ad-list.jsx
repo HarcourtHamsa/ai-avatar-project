@@ -9,6 +9,9 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
   const [selectedAdId, setSelectedAdId] = useState(null);
   const [playingAdId, setPlayingAdId] = useState(null);
   const [modalAd, setModalAd] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [adToDelete, setAdToDelete] = useState(null);
+
   const videoRefs = useRef({});
   const modalVideoRef = useRef(null);
 
@@ -65,8 +68,15 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
   };
 
   const handleDelete = () => {
-    setUgcAds(ugcAds.filter((ad) => ad.id !== modalAd.id));
     setModalAd(null);
+    setAdToDelete(modalAd);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    setUgcAds(ugcAds.filter((ad) => ad.id !== adToDelete.id));
+    setShowDeleteConfirm(false);
+    setAdToDelete(null);
   };
 
   return (
@@ -161,6 +171,35 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
               />
 
               <Button onClick={handleDelete} label={"Delete"} theme="danger" />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showDeleteConfirm && adToDelete && (
+        <Modal
+          onClose={() => {
+            setShowDeleteConfirm(false);
+            setAdToDelete(null);
+          }}
+        >
+          <div className="p-4 text-center space-y-4">
+            <p className="text-lg font-semibold">
+              Delete “{adToDelete.title}”?
+            </p>
+            <p className="text-sm text-gray-500">
+              Are you sure you want to delete this generated video?
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button
+                label="Cancel"
+                theme="white"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setAdToDelete(null);
+                }}
+              />
+              <Button label="Delete" theme="danger" onClick={confirmDelete} />
             </div>
           </div>
         </Modal>
