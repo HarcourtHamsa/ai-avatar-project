@@ -1,7 +1,7 @@
-import { Karla, IBM_Plex_Sans } from "next/font/google";
+import { Karla, Roboto } from "next/font/google";
 import "./globals.css";
 
-const font = Karla({
+const font = Roboto({
   weight: "400",
   subsets: ["latin"],
 });

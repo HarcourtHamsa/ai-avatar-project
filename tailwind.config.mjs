@@ -17,6 +17,11 @@ export default {
         cGray: "#667085",
         cPink: "#FC52E4",
       },
+      boxShadow: {
+        'custom-sm': '0px 2px 2px -1px #0A0D120A',
+        'custom-md': '0px 4px 6px -2px #0A0D1208',
+        'custom-lg': '0px 12px 16px -4px #0A0D1214',
+      },
     },
   },
   plugins: [],

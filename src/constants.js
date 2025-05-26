@@ -7,6 +7,8 @@ export class Routes {
   static transactions = "/dashboard/transactions";
   static aiUgc = "/dashboard/ai-ugc";
   static newAiUgc = "/dashboard/ai-ugc/new";
+  static settings = "/dashboard/settings";
+  static help = "/dashboard/help";
 }
 
 export const ICON_SIZE = 20;

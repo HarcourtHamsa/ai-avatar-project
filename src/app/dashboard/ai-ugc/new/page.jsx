@@ -6,6 +6,7 @@ import Button from "@/components/button";
 import AiAvatarFormStep from "@/components/avatar-form-step";
 import AvatarSelectionStep from "@/components/avatar-selection-form";
 import AnimateAvatarStep from "@/components/animate-avatar-form";
+import HookDemoBuilderForm from "@/components/hook-demo-builder-form";
 
 const STEPS = [
   {
@@ -32,6 +33,7 @@ const Page = () => {
 
       {currentStep === 0 && <AvatarSelectionStep />}
       {currentStep === 1 && <AnimateAvatarStep />}
+      {currentStep === 2 && <HookDemoBuilderForm />}
 
       <div className="flex justify-between mt-8">
         <div className="w-fit">

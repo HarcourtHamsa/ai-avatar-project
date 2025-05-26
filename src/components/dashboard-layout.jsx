@@ -77,12 +77,12 @@ const DashboardLayout = ({ children, label }) => {
     {
       label: "Settings",
       icon: <Settings size={ICON_SIZE} />,
-      path: "/settings",
+      path: Routes.settings,
     },
     {
       label: "Help & Support",
       icon: <HelpCircle size={ICON_SIZE} />,
-      path: "/help",
+      path: Routes.help,
     },
   ];
 
