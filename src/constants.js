@@ -11,4 +11,8 @@ export class Routes {
   static help = "/dashboard/help";
 }
 
+export class QueryKeys {
+  static defaultAvatars = "default-avatars";
+}
+
 export const ICON_SIZE = 20;

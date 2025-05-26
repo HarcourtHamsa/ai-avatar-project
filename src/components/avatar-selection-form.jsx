@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import clsx from "clsx";
+import { useQuery } from "@tanstack/react-query";
 import { CloudUpload, X } from "lucide-react";
 import Button from "./button";
 import { ICON_SIZE } from "@/constants";
 import Input from "./input";
+import { useFetchAvatars } from "@/app/hooks/use-fetch-avatars";
+import Image from "next/image";
 
 const MAX_FILE_SIZE_MB = 2;
+const PAGE_SIZE = 12;
 
 const avatarOptions = [
   {
@@ -31,6 +35,26 @@ const AvatarSelectionStep = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [showGeneratedAvatars, setShowGeneratedAvatars] = useState(false);
+
+  const { data: avatars, isLoading, isError, error } = useFetchAvatars();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate total pages
+  const totalPages = Math.ceil((avatars?.length || 0) / PAGE_SIZE);
+
+  // Get current avatars
+  const paginatedAvatars = avatars?.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
 
   const handleFile = (file) => {
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
@@ -59,6 +83,10 @@ const AvatarSelectionStep = () => {
   const handleGenerateAvatars = () => {
     setShowGeneratedAvatars(true);
   };
+
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) return <p>Error: {error.message}</p>;
+  console.log({ avatars });
 
   return (
     <div className="px-4 py-2 border rounded-lg bg-white">
@@ -98,17 +126,17 @@ const AvatarSelectionStep = () => {
       {selectedOption === 0 && (
         <div>
           <div className="border rounded-lg p-4">
-            <p>Default Avatars</p>
+            <p>Default Avatars </p>
             <small className="text-gray-400">
               Browse and select from ready-to-use faces.
             </small>
 
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
-              {Array.from({ length: 12 }).map((_, index) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              {paginatedAvatars?.map((avatar, index) => (
                 <div
-                  key={`default-${index}`}
+                  key={`default-${avatar?.avatar_id}`}
                   className={clsx(
-                    "w-14 h-14 rounded-md flex items-center justify-center text-sm cursor-pointer transition-all",
+                    "w-[100px] h-[100px] rounded-md flex items-center justify-center text-sm cursor-pointer transition-all relative overflow-hidden",
                     selectedAvatar === `default-${index}`
                       ? "border-2 border-orange-500 bg-orange-100"
                       : "bg-gray-300"
@@ -116,9 +144,34 @@ const AvatarSelectionStep = () => {
                   onClick={() => setSelectedAvatar(`default-${index}`)}
                   tabIndex={0}
                 >
-                  <span className="text-xs text-white">{index + 1}</span>
+                  <Image
+                    src={avatar?.preview_image_url}
+                    alt={`Default Avatar ${index}`}
+                    fill
+                    className="object-cover rounded-md"
+                  />
                 </div>
               ))}
+            </div>
+
+            <div className="flex justify-center items-center gap-4 mt-12">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                className="text-sm px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span className="text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="text-sm px-3 py-1 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
           </div>
 

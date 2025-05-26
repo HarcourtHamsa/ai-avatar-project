@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    domains: ["files2.heygen.ai"],
+  },
   experimental: {
     esmExternals: true,
     turbo: {
