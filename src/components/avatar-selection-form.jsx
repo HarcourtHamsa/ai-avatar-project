@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
 import { CloudUpload, X } from "lucide-react";
 import Button from "./button";
 import { ICON_SIZE } from "@/constants";
 import Input from "./input";
 import { useFetchAvatars } from "@/app/hooks/use-fetch-avatars";
 import Image from "next/image";
+import { useUploadAsset } from "@/app/hooks/use-upload-asset";
+import { useFetchSavedAvatars } from "@/app/hooks/use-fetch-saved-avatars";
+import { useGenerateAvatar } from "@/app/hooks/use-generate-avatar";
+import PercentageLoader from "./percentage-loader"; // Import the new component
+import Spinner from "./spinner";
 
 const MAX_FILE_SIZE_MB = 2;
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 15;
 
 const avatarOptions = [
   {
@@ -33,10 +37,45 @@ const AvatarSelectionStep = () => {
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [uploadedAvatar, setUploadedAvatar] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
   const [showGeneratedAvatars, setShowGeneratedAvatars] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [prompt, setPrompt] = useState("");
+  const [showPercentageLoader, setShowPercentageLoader] = useState(false);
 
   const { data: avatars, isLoading, isError, error } = useFetchAvatars();
+  const { data: savedAvatars, isLoading: isLoadingSavedAvatars } =
+    useFetchSavedAvatars();
+
+  const {
+    mutate: uploadAsset,
+    isPending: isUploading,
+    isSuccess: isUploadSuccess,
+    isError: isUploadError,
+    error: uploadError,
+    data: uploadedAsset,
+  } = useUploadAsset();
+
+  const {
+    mutate: generateAvatar,
+    isPending: isGenerating,
+    isSuccess: isGenerateSuccess,
+    isError: isGenerateError,
+    error: generateError,
+    data: generatedAvatars,
+  } = useGenerateAvatar({
+    onMutate: () => {
+      setShowPercentageLoader(true);
+    },
+    onSuccess: () => {
+      setShowPercentageLoader(false);
+    },
+    onError: () => {
+      // Stop percentage loader on error
+      setShowPercentageLoader(false);
+      console.error("Avatar generation failed:", error.message);
+    },
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
 
   // Calculate total pages
@@ -58,35 +97,47 @@ const AvatarSelectionStep = () => {
 
   const handleFile = (file) => {
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      setUploadError("File size exceeds 2MB limit.");
+      setUploadedFile(null);
       setUploadedAvatar(null);
       return;
     }
 
     const imageUrl = URL.createObjectURL(file);
     setUploadedAvatar(imageUrl);
-    setUploadError(null);
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUploadedAvatar(imageUrl);
-    }
+    setUploadedFile(file);
   };
 
   const handleRemoveUpload = () => {
     setUploadedAvatar(null);
+    setUploadedFile(null);
   };
 
   const handleGenerateAvatars = () => {
-    setShowGeneratedAvatars(true);
+    generateAvatar({
+      appearance: prompt,
+    });
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  const handleUpload = () => {
+    if (uploadedFile) {
+      uploadAsset(uploadedFile);
+    }
+  };
+
+  const handlePercentageComplete = () => {
+    // This runs if the percentage loader completes before polling
+    // You might want to show a different message here
+    console.log(
+      "Percentage loader completed - still waiting for generation..."
+    );
+  };
+
+  const handleUseGeneratedAvatar = () => {
+    const avatarIndex = extractNumber(selectedAvatar);
+    console.log({ avatarIndex });
+  };
+
   if (isError) return <p>Error: {error.message}</p>;
-  console.log({ avatars });
 
   return (
     <div className="px-4 py-2 border rounded-lg bg-white">
@@ -131,12 +182,19 @@ const AvatarSelectionStep = () => {
               Browse and select from ready-to-use faces.
             </small>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            {/* TODO: Show loading spinner */}
+            {isLoading && (
+              <div className="w-full flex justify-center mt-4">
+                <Spinner color="text-cOrange" />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
               {paginatedAvatars?.map((avatar, index) => (
                 <div
                   key={`default-${avatar?.avatar_id}`}
                   className={clsx(
-                    "w-[100px] h-[100px] rounded-md flex items-center justify-center text-sm cursor-pointer transition-all relative overflow-hidden",
+                    "w-full md:w-[180px] h-[250px] md:h-[180px] rounded-md flex items-center justify-center text-sm cursor-pointer transition-all relative overflow-hidden",
                     selectedAvatar === `default-${index}`
                       ? "border-2 border-orange-500 bg-orange-100"
                       : "bg-gray-300"
@@ -181,20 +239,25 @@ const AvatarSelectionStep = () => {
               Reuse your previously generated or uploaded avatars
             </small>
 
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
-              {Array.from({ length: 3 }).map((_, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+              {savedAvatars?.map((avatar, index) => (
                 <div
-                  key={`saved-${index}`}
+                  key={`default-${avatar?.id}`}
                   className={clsx(
-                    "w-14 h-14 rounded-md flex items-center justify-center text-sm cursor-pointer transition-all",
-                    selectedAvatar === `saved-${index}`
+                    "w-full md:w-[180px] h-[250px] md:h-[180px] rounded-md flex items-center justify-center text-sm cursor-pointer transition-all relative overflow-hidden",
+                    selectedAvatar === `default-${index}`
                       ? "border-2 border-orange-500 bg-orange-100"
                       : "bg-gray-300"
                   )}
-                  onClick={() => setSelectedAvatar(`saved-${index}`)}
+                  onClick={() => setSelectedAvatar(`default-${index}`)}
                   tabIndex={0}
                 >
-                  <span className="text-xs text-white">{index + 1}</span>
+                  <Image
+                    src={avatar?.url}
+                    alt={`Default Avatar ${index}`}
+                    fill
+                    className="object-cover rounded-md"
+                  />
                 </div>
               ))}
             </div>
@@ -239,7 +302,7 @@ const AvatarSelectionStep = () => {
               </label>
               <p className="text-gray-400">or drag and drop</p>
             </div>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-center text-sm">
               PNG or JPG (max. 2MB, 800x400px recommended)
             </p>
           </div>
@@ -249,10 +312,6 @@ const AvatarSelectionStep = () => {
             video ratio)
           </small>
 
-          {uploadError && (
-            <p className="text-red-500 text-sm mt-2">{uploadError}</p>
-          )}
-
           <div className="mt-4">
             {uploadedAvatar ? (
               <div className="flex flex-col items-start gap-4 relative w-fit">
@@ -261,7 +320,7 @@ const AvatarSelectionStep = () => {
                   alt="Uploaded Avatar"
                   className="w-28 h-28 object-cover rounded-lg border-2 border-orange-500"
                 />
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 mb-4">
                   <Input type="checkbox" />
                   <div>
                     <p className="mb-0">Save Image as Avatar</p>
@@ -270,6 +329,27 @@ const AvatarSelectionStep = () => {
                     </p>
                   </div>
                 </div>
+
+                {isUploadError && (
+                  <p className="text-red-500 bg-red-100 w-full text-sm mt-2 px-4 py-2 rounded-lg">
+                    Error: {uploadError.message}
+                  </p>
+                )}
+
+                {isUploadSuccess && (
+                  <p className="text-green-500 bg-green-100 w-full text-sm mt-2 px-4 py-2 rounded-lg">
+                    Asset Uploaded Successfully!
+                  </p>
+                )}
+
+                <Button
+                  label={"Upload"}
+                  theme="pink"
+                  onClick={handleUpload}
+                  isLoading={isUploading}
+                  disabled={!uploadedFile}
+                />
+
                 <div
                   onClick={handleRemoveUpload}
                   className="cursor-pointer text-sm underline absolute left-24 bg-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg"
@@ -282,12 +362,23 @@ const AvatarSelectionStep = () => {
         </div>
       )}
 
+      {/* Generate Avatar by Prompt */}
       {selectedOption === 2 && (
         <div>
           <div>
             <label>Describe the avatar you want:</label>
-            <textarea className="w-full  border rounded-lg p-4" cols={20} />
+            <textarea
+              className="w-full  border rounded-lg p-4"
+              cols={20}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+            />
           </div>
+          {isGenerateError && (
+            <p className="text-red-500 bg-red-100 w-full text-sm mt-2 px-4 py-2 rounded-lg">
+              Error: {generateError.message}
+            </p>
+          )}
           <div className="flex flex-col md:flex-row gap-4 justify-between mt-4">
             <button className="border w-fit border-cOrange px-4 py-2 rounded-lg text-cOrange text-sm hover:opacity-50">
               AI Credits Remaining: 49
@@ -297,35 +388,58 @@ const AvatarSelectionStep = () => {
               <Button
                 label={"Generate Avatar"}
                 onClick={handleGenerateAvatars}
+                isLoading={isGenerating}
+                disabled={isGenerating}
               />
             </div>
           </div>
-          {showGeneratedAvatars && (
-            <div className="mt-8">
-              <p className="text-center">Avatar Generation Results</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={`gen-${index}`}
-                    className={clsx(
-                      "h-[250px] bg-gray-300 rounded-lg cursor-pointer transition-all",
-                      selectedAvatar === `gen-${index}`
-                        ? "ring-4 ring-cOrange"
-                        : "hover:ring-2 hover:ring-orange-300"
-                    )}
-                    onClick={() => setSelectedAvatar(`gen-${index}`)}
-                    tabIndex={0}
-                  ></div>
-                ))}
-              </div>
 
-              <div className="flex items-center gap-4 mt-2">
-                <Input type="checkbox" />
-                <div>
-                  <p className="mb-0">Save Image as Avatar</p>
-                  <p className="-mt-1 text-sm text-gray-400">
-                    Reuse this image for future usage
-                  </p>
+          {/* Show percentage loader during generation */}
+          {showPercentageLoader && (
+            <div className="mt-8">
+              <PercentageLoader
+                isActive={showPercentageLoader}
+                onComplete={handlePercentageComplete}
+                duration={160000} // 90 seconds - longer than expected polling time
+              />
+            </div>
+          )}
+
+          {/* Show success state when generation completes */}
+          {isGenerateSuccess && !showPercentageLoader && (
+            <div className="mt-8">
+              <p className="text-center text-2xl">Generated Avatars</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                {generatedAvatars?.data?.image_url_list?.map((url, index) => (
+                  <div
+                    key={`default-${index}`}
+                    className={clsx(
+                      "w-full md:w-[200px] h-[250px]  md:h-[200px] rounded-md flex items-center justify-center text-sm cursor-pointer transition-all relative overflow-hidden",
+                      selectedAvatar === `default-${index}`
+                        ? "border-2 border-orange-500 bg-orange-100"
+                        : "bg-gray-300"
+                    )}
+                    onClick={() => setSelectedAvatar(`default-${index}`)}
+                    tabIndex={0}
+                  >
+                    <Image
+                      src={url}
+                      alt={`Default Avatar ${index}`}
+                      fill
+                      sizes="(min-width: 768px) 200px, 100vw"
+                      className="object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+
+                <div className="mt-4">
+                  <Button
+                    label={"Use Avatar"}
+                    onClick={() => handleUseGeneratedAvatar()}
+                    theme="pink"
+                    // isLoading={isGenerating}
+                    // disabled={isGenerating}
+                  />
                 </div>
               </div>
             </div>

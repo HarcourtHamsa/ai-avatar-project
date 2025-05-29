@@ -13,6 +13,13 @@ export class Routes {
 
 export class QueryKeys {
   static defaultAvatars = "default-avatars";
+  static savedAvatars = "saved-avatars";
+  static generationStatus = "generation-status";
+}
+
+export class Collections {
+  static avatars = "avatars";
+  static savedAvatars = "saved_avatars";
 }
 
 export const ICON_SIZE = 20;
