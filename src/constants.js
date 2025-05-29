@@ -22,4 +22,10 @@ export class Collections {
   static savedAvatars = "saved_avatars";
 }
 
+export class AvatarSource {
+  static generated = "generated";
+  static uploaded = "uploaded";
+  static default = "default";
+}
+
 export const ICON_SIZE = 20;

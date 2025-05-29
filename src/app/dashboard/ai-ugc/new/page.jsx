@@ -28,7 +28,7 @@ const Page = () => {
 
       {currentStep === 0 && <AvatarSelectionStep />}
       {currentStep === 1 && <AnimateAvatarStep />}
-      {currentStep === 2 && <HookDemoBuilderForm />}
+      {currentStep === 2 && <HookDemoBuilderForm />}  
 
       <div className="flex justify-between mt-8">
         <div className="w-fit">

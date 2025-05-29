@@ -1,11 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useFirestore } from "./use-firestore";
-import { auth } from "@/lib/firebase";
-import { Collections } from "@/constants";
 
-export const useUploadAsset = () => {
+export const useUploadAsset = (options = {}) => {
   const query = useQueryClient();
-  const { addDocument } = useFirestore();
 
   return useMutation({
     mutationFn: async (file) => {
@@ -25,13 +21,6 @@ export const useUploadAsset = () => {
       const data = await response.json();
       return data.data;
     },
-    onSuccess: async (data) => {
-      await addDocument(Collections.savedAvatars, {
-        ...data.data,
-        uid: auth.currentUser.uid,
-      });
-
-      query.invalidateQueries({ queryKey: [Collections.savedAvatars] });
-    },
+    ...options,
   });
 };

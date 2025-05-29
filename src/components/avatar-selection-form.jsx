@@ -4,7 +4,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { CloudUpload, X } from "lucide-react";
 import Button from "./button";
-import { ICON_SIZE } from "@/constants";
+import { AvatarSource, Collections, ICON_SIZE } from "@/constants";
 import Input from "./input";
 import { useFetchAvatars } from "@/app/hooks/use-fetch-avatars";
 import Image from "next/image";
@@ -13,6 +13,7 @@ import { useFetchSavedAvatars } from "@/app/hooks/use-fetch-saved-avatars";
 import { useGenerateAvatar } from "@/app/hooks/use-generate-avatar";
 import PercentageLoader from "./percentage-loader"; // Import the new component
 import Spinner from "./spinner";
+import { extractNumber, getImageData } from "@/utils/global";
 
 const MAX_FILE_SIZE_MB = 2;
 const PAGE_SIZE = 15;
@@ -41,6 +42,7 @@ const AvatarSelectionStep = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [showPercentageLoader, setShowPercentageLoader] = useState(false);
+  const [imageData, setImageData] = useState({});
 
   const { data: avatars, isLoading, isError, error } = useFetchAvatars();
   const { data: savedAvatars, isLoading: isLoadingSavedAvatars } =
@@ -53,7 +55,18 @@ const AvatarSelectionStep = () => {
     isError: isUploadError,
     error: uploadError,
     data: uploadedAsset,
-  } = useUploadAsset();
+  } = useUploadAsset({
+    onSuccess: async (data) => {
+      await addDocument(Collections.savedAvatars, {
+        ...data.data,
+        uid: auth.currentUser.uid,
+      });
+
+      handleUseDefaultAvatar(data.data, AvatarSource.uploaded);
+
+      query.invalidateQueries({ queryKey: [Collections.savedAvatars] });
+    },
+  });
 
   const {
     mutate: generateAvatar,
@@ -125,8 +138,6 @@ const AvatarSelectionStep = () => {
   };
 
   const handlePercentageComplete = () => {
-    // This runs if the percentage loader completes before polling
-    // You might want to show a different message here
     console.log(
       "Percentage loader completed - still waiting for generation..."
     );
@@ -134,7 +145,17 @@ const AvatarSelectionStep = () => {
 
   const handleUseGeneratedAvatar = () => {
     const avatarIndex = extractNumber(selectedAvatar);
-    console.log({ avatarIndex });
+    const result = getImageData(generatedAvatars.data, avatarIndex);
+    setImageData(result);
+  };
+
+  const handleUseDefaultAvatar = (avatar, source) => {
+    setImageData({
+      source: source,
+      id: avatar.avatar_id || avatar.id,
+      image_url: avatar.preview_image_url || avatar.url,
+      image_key: avatar.image_key,
+    });
   };
 
   if (isError) return <p>Error: {error.message}</p>;
@@ -199,7 +220,10 @@ const AvatarSelectionStep = () => {
                       ? "border-2 border-orange-500 bg-orange-100"
                       : "bg-gray-300"
                   )}
-                  onClick={() => setSelectedAvatar(`default-${index}`)}
+                  onClick={() => {
+                    setSelectedAvatar(`default-${index}`);
+                    handleUseDefaultAvatar(avatar, AvatarSource.default);
+                  }}
                   tabIndex={0}
                 >
                   <Image
@@ -249,7 +273,10 @@ const AvatarSelectionStep = () => {
                       ? "border-2 border-orange-500 bg-orange-100"
                       : "bg-gray-300"
                   )}
-                  onClick={() => setSelectedAvatar(`default-${index}`)}
+                  onClick={() => {
+                    setSelectedAvatar(`default-${index}`);
+                    handleUseDefaultAvatar(avatar, AvatarSource.uploaded);
+                  }}
                   tabIndex={0}
                 >
                   <Image
@@ -419,7 +446,10 @@ const AvatarSelectionStep = () => {
                         ? "border-2 border-orange-500 bg-orange-100"
                         : "bg-gray-300"
                     )}
-                    onClick={() => setSelectedAvatar(`default-${index}`)}
+                    onClick={() => {
+                      setSelectedAvatar(`default-${index}`);
+                      handleUseGeneratedAvatar();
+                    }}
                     tabIndex={0}
                   >
                     <Image
@@ -431,16 +461,6 @@ const AvatarSelectionStep = () => {
                     />
                   </div>
                 ))}
-
-                <div className="mt-4">
-                  <Button
-                    label={"Use Avatar"}
-                    onClick={() => handleUseGeneratedAvatar()}
-                    theme="pink"
-                    // isLoading={isGenerating}
-                    // disabled={isGenerating}
-                  />
-                </div>
               </div>
             </div>
           )}
