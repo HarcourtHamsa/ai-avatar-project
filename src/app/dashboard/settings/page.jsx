@@ -1,53 +1,82 @@
 "use client";
 
 import Button from "@/components/button";
+import ComparePlans from "@/components/compare-plans";
 import DashboardLayout from "@/components/dashboard-layout";
 import FaqSection from "@/components/faq-section";
+import LastPricingCard from "@/components/last-pricing-card";
 import PricingCard from "@/components/pricing-card";
 import { ArrowRight } from "lucide-react";
 
 const planDataPrice = [
   {
+    type: "Basic Plan",
+    price: "FREE",
+    period: "/ 7 Days",
+    description: "Then $99/month",
+    benfits: [
+      "Creator Marketplace Access",
+      "Priority Support",
+      "10 AI Videos / Month",
+      "Generate 1 Custom AI Actor",
+      "Access 300+ Natural AI Actors",
+      "2 Minute Wait Time",
+      "AI Reactions",
+      "Use 35 Languages",
+      "Play Videos Up To 90 Seconds",
+    ],
+  },
+  {
     type: "Starter Plan",
-    price: "$29",
+    price: "$170",
     period: "/ Month",
     description:
       "Perfect for brands trying AI-powered content for the first time.",
     benfits: [
-      "Generate 10 UGC Videos per month",
-      "Generate AI avatars (25 images, 5 videos)",
-      "Access 20+ Default Avatars",
-      "Unlimited Hook Generations",
-      "Add background music to ads",
-    ],
-  },
-  {
-    type: "Growth Plan",
-    price: "$59",
-    period: "/ Month",
-    description:
-      "Ideal for scaling brands that need consistent creative output.",
-    benfits: [
-      "Generate 40 UGC Videos per month",
-      "Generate AI avatars (40 images, 10 videos)",
-      "Access 20+ Default Avatars",
-      "Unlimited Hook Generations",
-      "Add background music to ads",
+      "Creator Marketplace Access",
+      "10 AI Videos / Month",
+      "Generate 1 Custom AI Actor",
+      "Access 300+ Natural AI Actors",
+      "2 Minute Wait Time",
+      "AI Reactions",
+      "Use 35 Languages",
+      "Play Videos Up To 90 Seconds",
+      "Priority Support",
     ],
     banner: true,
   },
   {
-    type: "Scale Plan",
-    price: "$99",
+    type: "Growth Plan",
+    price: "$340",
     period: "/ Month",
+    description:
+      "Ideal for scaling brands that need consistent creative output.",
+    benfits: [
+      "Creator Marketplace Access",
+      "10 AI Videos / Month",
+      "Generate 1 Custom AI Actor",
+      "Access 300+ Natural AI Actors",
+      "2 Minute Wait Time",
+      "AI Reactions",
+      "Use 35 Languages",
+      "Play Videos Up To 90 Seconds",
+      "Priority Support",
+    ],
+  },
+  {
+    type: "Scale Plan",
+    price: "Custom",
     description:
       "Built for agencies and content-heavy brands with high demand.",
     benfits: [
-      "Generate 150 UGC Videos per month",
-      "Generate AI avatars (100 images, 30 videos)",
-      "Access 20+ Default Avatars",
-      "Unlimited Hook Generations",
-      "Add background music to ads",
+      "Creator Marketplace Access",
+      "10 AI Videos / Month",
+      "Generate 1 Custom AI Actor",
+      "Access 300+ Natural AI Actors",
+      "2 Minute Wait Time",
+      "AI Reactions",
+      "Use 35 Languages",
+      "Play Videos Up To 90 Seconds",
       "Priority Support",
     ],
   },
@@ -75,12 +104,15 @@ const SettingsPage = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {planDataPrice.map((item, index) => (
+          {planDataPrice.slice(0, 3).map((item, index) => (
             <PricingCard key={index} {...item} />
           ))}
         </div>
 
-        <FaqSection />
+        <LastPricingCard item={planDataPrice[3]} />
+
+        <ComparePlans />
+        {/* <FaqSection /> */}
       </div>
     </DashboardLayout>
   );

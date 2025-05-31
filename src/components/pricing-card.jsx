@@ -1,10 +1,10 @@
 import React from "react";
 import Button from "./button";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, CircleX } from "lucide-react";
 
 const PricingCard = ({ type, price, period, description, benfits, banner }) => {
   return (
-    <div className="flex-1 bg-white border border-black/10 shadow-custom-sm rounded-2xl overflow-hidden w-full max-w-[400px] mx-auto sm:max-w-full shadow-lg">
+    <div className="flex-1 bg-white border border-black/10 shadow-custom-sm rounded-2xl overflow-hidden w-full max-w-[400px] mx-auto sm:max-w-full shadow-lg flex flex-col justify-between">
       {banner && (
         <div className="w-full bg-cPink py-2 text-center">
           <p className="text-white font-bold text-sm sm:text-base uppercase">
@@ -33,15 +33,36 @@ const PricingCard = ({ type, price, period, description, benfits, banner }) => {
       </div>
 
       <div className="px-4 sm:px-6">
-        <div className="border-y border-[#E9EAEB] flex flex-col py-4 sm:py-6 gap-3 sm:gap-4">
-          {benfits?.map((item, index) => (
-            <div key={index} className="flex items-start gap-3">
-              <CheckCircle2 className="text-cOrange min-w-5" />
-              <p className="text-[#535862] text-sm font-normal flex-1">
-                {item}
-              </p>
-            </div>
-          ))}
+        <div className="border-t border-t-[#E9EAEB] flex flex-col py-4 sm:py-6 gap-3 sm:gap-4">
+          {type.includes("Basic") ? (
+            <>
+              {benfits?.slice(0, 2)?.map((item, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CheckCircle2 className="text-cOrange min-w-5" />
+                  <p className="text-[#535862] text-sm font-normal flex-1">
+                    {item}
+                  </p>
+                </div>
+              ))}
+              {benfits?.slice(2)?.map((item, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CircleX className="text-[#667085] min-w-5" />
+                  <p className="text-[#535862] text-sm font-normal flex-1">
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </>
+          ) : (
+            benfits?.map((item, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <CheckCircle2 className="text-cOrange min-w-5" />
+                <p className="text-[#535862] text-sm font-normal flex-1">
+                  {item}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
