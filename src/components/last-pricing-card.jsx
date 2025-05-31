@@ -8,7 +8,7 @@ const LastPricingCard = ({ item }) => {
       {/* Left Content */}
       <div className="flex flex-col gap-4 sm:gap-6 flex-1">
         <div className="bg-white w-fit border border-[#D5D7DA] py-0.5 px-2 gap-1.5 rounded-md flex items-center">
-          <div className="border-4 border-[#F4EBFF] h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-cOrange" />
+          <div className="border-4 border-[rgb(244,235,255)] h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-cOrange" />
           <p className="text-[#414651] font-medium text-xs sm:text-sm">
             {item?.type}
           </p>

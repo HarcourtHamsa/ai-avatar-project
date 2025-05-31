@@ -1,0 +1,42 @@
+/* slider.css */
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    #ff6600 0%,
+    #ff6600 var(--progress),
+    #ccc var(--progress),
+    #ccc 100%
+  );
+  outline: none;
+  transition: background 0.3s ease;
+  position: relative;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ff6600;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  margin-top: -3px;
+  box-shadow: 0 0 0 2px white;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ff6600;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* JavaScript needs to update CSS variable --progress dynamically */
