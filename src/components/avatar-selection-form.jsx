@@ -14,6 +14,9 @@ import { useGenerateAvatar } from "@/app/hooks/use-generate-avatar";
 import PercentageLoader from "./percentage-loader"; // Import the new component
 import Spinner from "./spinner";
 import { extractNumber, getImageData } from "@/utils/global";
+import useStore from "@/store";
+import { useFirestore } from "@/app/hooks/use-firestore";
+import { auth } from "@/lib/firebase";
 
 const MAX_FILE_SIZE_MB = 2;
 const PAGE_SIZE = 15;
@@ -34,6 +37,7 @@ const avatarOptions = [
 ];
 
 const AvatarSelectionStep = () => {
+  const { addDocument } = useFirestore();
   const [selectedOption, setSelectedOption] = useState(0);
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [uploadedAvatar, setUploadedAvatar] = useState(null);
@@ -42,7 +46,11 @@ const AvatarSelectionStep = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [prompt, setPrompt] = useState("");
   const [showPercentageLoader, setShowPercentageLoader] = useState(false);
-  const [imageData, setImageData] = useState({});
+  const [isProcessingWorkflow, setIsProcessingWorkflow] = useState(false);
+  const [workflowError, setWorkflowError] = useState(null);
+
+  // store
+  const { preset, setPreset } = useStore();
 
   const { data: avatars, isLoading, isError, error } = useFetchAvatars();
   const { data: savedAvatars, isLoading: isLoadingSavedAvatars } =
@@ -57,14 +65,29 @@ const AvatarSelectionStep = () => {
     data: uploadedAsset,
   } = useUploadAsset({
     onSuccess: async (data) => {
-      await addDocument(Collections.savedAvatars, {
-        ...data.data,
-        uid: auth.currentUser.uid,
-      });
+      try {
+        // await addDocument(Collections.savedAvatars, {
+        //   ...data.data,
+        //   uid: auth.currentUser.uid,
+        // });
 
-      handleUseDefaultAvatar(data.data, AvatarSource.uploaded);
+        handleUseDefaultAvatar(data.data, AvatarSource.uploaded);
 
-      query.invalidateQueries({ queryKey: [Collections.savedAvatars] });
+        setIsProcessingWorkflow(true);
+        setWorkflowError(null);
+
+        const result = await processAvatarWorkflow(
+          data.data,
+          auth.currentUser.uid
+        );
+
+        console.log("Workflow completed successfully:", result);
+      } catch (error) {
+        console.error("Workflow failed:", error);
+        setWorkflowError(error.message);
+      } finally {
+        setIsProcessingWorkflow(false);
+      }
     },
   });
 
@@ -146,16 +169,217 @@ const AvatarSelectionStep = () => {
   const handleUseGeneratedAvatar = () => {
     const avatarIndex = extractNumber(selectedAvatar);
     const result = getImageData(generatedAvatars.data, avatarIndex);
-    setImageData(result);
+    setPreset(result);
   };
 
   const handleUseDefaultAvatar = (avatar, source) => {
-    setImageData({
+    setPreset({
       source: source,
       id: avatar.avatar_id || avatar.id,
       image_url: avatar.preview_image_url || avatar.url,
       image_key: avatar.image_key,
     });
+  };
+
+  // Helper function for sequential avatar processing
+  const processAvatarWorkflow = async (avatarData, uid) => {
+    try {
+      // step 1: create photo avatar group
+      // console.log("Step 1: Creating avatar group...");
+
+      // const avatarGroupResponse = await fetch("/api/avatars/create-group", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     name: avatarData.name,
+      //     image_key: avatarData.image_key,
+      //   }),
+      // });
+
+      // if (!avatarGroupResponse.ok) {
+      //   const error = await avatarGroupResponse.json();
+      //   throw new Error(`avatar group step failed: ${error.message}`);
+      // }
+
+      // console.log("Avatar group response: ", avatarGroupResponse);
+
+      // const { group_id } = avatarGroupResponse.data;
+
+      const group_id = "930678434473480a839e4bd92996723c";
+
+      console.log({ group_id });
+
+      // step 2: Train avatar group
+      // console.log("Step 2: Training avatar group...");
+
+      // const trainingGroupResponse = await fetch("/api/avatars/train", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     group_id: group_id,
+      //   }),
+      // });
+
+      // if (!trainingGroupResponse.ok) {
+      //   const error = await trainingGroupResponse.json();
+      //   throw new Error(`Training step failed: ${error.message}`);
+      // }
+
+      // console.log("Training group response: ", trainingGroupResponse);
+
+      // TODO: test endpoints below
+
+      // Step 3: Check training status
+      console.log("Step 3: Checking training status...");
+
+      const trainingStatusData = await pollForStatus(
+        "/api/avatars/train/status",
+        group_id
+      );
+
+      if (trainingStatusData.data.status !== "completed") {
+        throw new Error("Training status failed");
+      }
+
+      console.log("Training status data: ", trainingStatusData.data);
+
+      // // Step 1: Add motion to the avatar
+      // console.log("Step 1: Adding motion to avatar...");
+
+      // const motionResponse = await fetch("/api/avatars/add-motion", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     id: avatarData.id,
+      //     prompt: "Be expressive",
+      //     motion_type: "expressive",
+      //   }),
+      // });
+
+      // if (!motionResponse.ok) {
+      //   const error = await motionResponse.json();
+      //   throw new Error(`Motion step failed: ${error.message}`);
+      // }
+
+      // const motionData = await motionResponse.json();
+
+      // console.log("Motion step completed:", motionData);
+
+      // // Step 2: Check motion status (with polling if needed)
+      // console.log("Step 2: Checking motion status...");
+
+      // const motionStatusData = await pollForStatus(
+      //   "/api/avatars/add-motion/status",
+      //   motionData.data.id
+      // );
+
+      // if (motionStatusData.data.status !== "completed") {
+      //   throw new Error("Motion processing failed");
+      // }
+
+      // // Step 3: Add sound effect
+      // console.log("Step 3: Adding sound effect...");
+      // const soundResponse = await fetch("/api/avatars/add-sound-effect", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     id: motionData.data.id,
+      //   }),
+      // });
+
+      // if (!soundResponse.ok) {
+      //   const error = await soundResponse.json();
+      //   throw new Error(`Sound effect step failed: ${error.message}`);
+      // }
+
+      // const soundData = await soundResponse.json();
+
+      // console.log("Sound effect step completed:", soundData);
+
+      // // Step 4: Check sound effect status
+      // console.log("Step 4: Checking sound effect status...");
+
+      // const soundStatusData = await pollForStatus(
+      //   "/api/avatars/add-sound-effect/status",
+      //   motionData.data.id
+      // );
+
+      // if (soundStatusData.status !== "completed") {
+      //   throw new Error("Sound effect processing failed");
+      // }
+
+      // console.log("Avatar processing workflow completed successfully!");
+      // return {
+      //   success: true,
+      //   data: {
+      //     ...avatarData,
+      //     motion_data: motionStatusData,
+      //     sound_data: soundStatusData,
+      //   },
+      // };
+    } catch (error) {
+      console.error("Avatar processing workflow failed:", error);
+      throw error;
+    }
+  };
+
+  const pollForStatus = async (
+    endpoint,
+    id,
+    maxAttempts = 30,
+    interval = 60000
+  ) => {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const response = await fetch(`${endpoint}?id=${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(`Status check failed: ${error.message}`);
+        }
+
+        const data = await response.json();
+
+        if (data.data.status === "completed") {
+          return data.data;
+        } else if (data.data.status === "failed") {
+          throw new Error("Processing failed on server");
+        }
+
+        // Still processing, wait before next attempt
+        console.log(
+          `Attempt ${attempt}: Status is ${data.data.status}, waiting...`
+        );
+
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, interval));
+        }
+      } catch (error) {
+        if (attempt === maxAttempts) {
+          throw error;
+        }
+        console.warn(
+          `Status check attempt ${attempt} failed, retrying...`,
+          error
+        );
+        await new Promise((resolve) => setTimeout(resolve, interval));
+      }
+    }
+
+    throw new Error("Status polling timed out");
   };
 
   if (isError) return <p>Error: {error.message}</p>;
@@ -386,6 +610,16 @@ const AvatarSelectionStep = () => {
               </div>
             ) : null}
           </div>
+
+          <div>
+            {isProcessingWorkflow && (
+              <PercentageLoader
+                isActive={isProcessingWorkflow}
+                onComplete={handlePercentageComplete}
+                duration={120000}
+              />
+            )}
+          </div>
         </div>
       )}
 
@@ -427,7 +661,7 @@ const AvatarSelectionStep = () => {
               <PercentageLoader
                 isActive={showPercentageLoader}
                 onComplete={handlePercentageComplete}
-                duration={160000} // 90 seconds - longer than expected polling time
+                duration={120000} // 90 seconds - longer than expected polling time
               />
             </div>
           )}

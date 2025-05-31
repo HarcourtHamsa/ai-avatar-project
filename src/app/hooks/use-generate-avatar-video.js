@@ -1,10 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useFirestore } from "./use-firestore";
-import { nanoid } from "nanoid";
+import { useMutation } from "@tanstack/react-query";
 
-export const useGenerateAvatar = (options = {}) => {
+export const useGenerateAvatarVideo = (options = {}) => {
   const pollForCompletion = async (
-    generationId,
+    videoId,
     maxAttempts = 30,
     interval = 60000 // 1 minute
   ) => {
@@ -12,13 +10,13 @@ export const useGenerateAvatar = (options = {}) => {
       await new Promise((resolve) => setTimeout(resolve, interval));
 
       const statusResponse = await fetch(
-        `/api/avatars/generate/status?id=${generationId}`
+        `/api/avatars/generate/video/status?id=${videoId}`
       );
 
       if (!statusResponse.ok) {
         const statusError = await statusResponse.json();
         throw new Error(
-          statusError.message || "Failed to check avatar generation status"
+          statusError.message || "Failed to check video  generation status"
         );
       }
 
@@ -41,33 +39,28 @@ export const useGenerateAvatar = (options = {}) => {
 
   return useMutation({
     mutationFn: async (payload) => {
-      const generateResponse = await fetch("/api/avatars/generate", {
+      const response = await fetch("/api/avatars/generate/video", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           ...payload,
-          name: nanoid(),
-          gender: "Unspecified",
-          age: "Unspecified",
-          ethnicity: "Unspecified",
-          orientation: "vertical",
-          pose: "half_body",
-          style: "Realistic",
+          dimension: {
+            width: 1280,
+            height: 720,
+          },
         }),
       });
 
-      if (!generateResponse.ok) {
-        console.log("API Response:", generateResponse);
-        const error = await generateResponse.json();
-        throw new Error(error.message || "Failed to generate avatar");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to generate video");
       }
 
-      const generateData = await generateResponse.json();
-      const { generation_id: generationId } = generateData.data;
+      const generateData = await response.json();
+      const { video_id: videoId } = generateData.data.data;
 
-      const statusData = await pollForCompletion(generationId);
+      console.log("Video ID:", videoId);
+
+      const statusData = await pollForCompletion(videoId);
       return statusData;
     },
     ...options,
