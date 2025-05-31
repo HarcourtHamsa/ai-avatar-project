@@ -8,11 +8,14 @@ import AiAvatarFormStep from "@/components/avatar-form-step";
 import AvatarSelectionStep from "@/components/avatar-selection-form";
 import AnimateAvatarStep from "@/components/animate-avatar-form";
 import HookDemoBuilderForm from "@/components/hook-demo-builder-form";
+import VideoSetupStep from "@/components/video-setup-form";
+import ActorSelectionStep from "@/components/actor-selection-form";
 
 const STEPS = [
-  { id: 0, label: "Avatar Selection" },
-  { id: 1, label: "Animate Avatar" },
-  { id: 2, label: "Hook + Demo Builder" },
+  { id: 0, label: "Video Setup" },
+  { id: 1, label: "Avatar Selection" },
+  { id: 2, label: "Script + Product" },
+  { id: 3, label: "Confirm Generation" },
 ];
 
 const Page = () => {
@@ -26,9 +29,10 @@ const Page = () => {
     <DashboardLayout label="Create New AI Ad">
       <AiAvatarFormStep currentStep={currentStep} steps={STEPS} />
 
-      {currentStep === 0 && <AvatarSelectionStep />}
-      {currentStep === 1 && <AnimateAvatarStep />}
-      {currentStep === 2 && <HookDemoBuilderForm />}
+      {currentStep === 0 && <VideoSetupStep />}
+      {currentStep === 1 && <ActorSelectionStep />}
+      {currentStep === 2 && <AnimateAvatarStep />}
+      {currentStep === 3 && <HookDemoBuilderForm />}
 
       <div className="flex justify-between mt-8">
         <div className="w-fit">

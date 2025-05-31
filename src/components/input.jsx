@@ -22,7 +22,7 @@ const Input = ({
   return (
     <div className="relative">
       {label && (
-        <label htmlFor={name} className="block mb-1 text-sm font-medium">
+        <label htmlFor={name} className="block mb-1 font-medium">
           {label}
         </label>
       )}

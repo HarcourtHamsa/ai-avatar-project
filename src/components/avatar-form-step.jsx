@@ -5,7 +5,7 @@ import { BadgeCheck } from "lucide-react";
 
 const AiAvatarFormStep = ({ currentStep, steps }) => {
   return (
-    <div className="flex gap-4 mb-6">
+    <div className="grid grid-cols-4 gap-4 mb-6">
       {steps.map((step, index) => {
         const currentIndex = steps.findIndex((s) => s.id === currentStep);
         const isActive = index <= currentIndex;

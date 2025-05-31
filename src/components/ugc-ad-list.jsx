@@ -81,7 +81,7 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {ugcAds.map((ad) => (
           <div key={ad.id} className="p-2 bg-white border rounded-lg">
             <div
@@ -119,7 +119,7 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
 
             <div className="flex justify-between items-center mt-2">
               <div>
-                <p className="text-sm font-medium">{ad.title}</p>
+                <p className="">{ad.title}</p>
                 <p className="text-xs text-gray-500">{ad.createdAt}</p>
               </div>
               <EllipsisVertical
