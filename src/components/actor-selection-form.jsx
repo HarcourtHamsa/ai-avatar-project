@@ -82,7 +82,7 @@ const ActorSelectionStep = () => {
   const [selectedAge, setSelectedAge] = useState(null);
   const [selectedEthnicity, setSelectedEthnicity] = useState(null);
   const [selectedBackground, setSelectedBackground] = useState(null);
-  const [selectedEmotion, setSelectedEmotion] = useState(EMOTIONS[0]);
+  const [selectedEmotion, setSelectedEmotion] = useState(null);
 
   // Mobile filter states
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);

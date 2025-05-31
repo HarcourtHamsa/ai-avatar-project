@@ -5,11 +5,11 @@ import { useState } from "react";
 import DashboardLayout from "@/components/dashboard-layout";
 import Button from "@/components/button";
 import AiAvatarFormStep from "@/components/avatar-form-step";
-import AvatarSelectionStep from "@/components/avatar-selection-form";
-import AnimateAvatarStep from "@/components/animate-avatar-form";
 import HookDemoBuilderForm from "@/components/hook-demo-builder-form";
 import VideoSetupStep from "@/components/video-setup-form";
 import ActorSelectionStep from "@/components/actor-selection-form";
+import ConfirmGenerationForm from "@/components/confirm-generation-form";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const STEPS = [
   { id: 0, label: "Video Setup" },
@@ -31,15 +31,24 @@ const Page = () => {
 
       {currentStep === 0 && <VideoSetupStep />}
       {currentStep === 1 && <ActorSelectionStep />}
-      {currentStep === 2 && <AnimateAvatarStep />}
-      {currentStep === 3 && <HookDemoBuilderForm />}
+      {currentStep === 2 && <HookDemoBuilderForm />}
+      {currentStep === 3 && <ConfirmGenerationForm />}
 
       <div className="flex justify-between mt-8">
         <div className="w-fit">
           <Button label="Save Draft" theme="secondary" />
         </div>
-        <div className="w-fit">
-          <Button label="Next" onClick={handleNext} />
+        <div className="w-fit flex gap-4">
+          {currentStep > 0 && (
+            <Button
+              label="Back"
+              theme="pink"
+              onClick={() => setCurrentStep((prev) => prev - 1)}
+              icon={<ArrowLeft />}
+            />
+          )}
+
+          <Button label="Next" onClick={handleNext} icon={<ArrowRight />} />
         </div>
       </div>
     </DashboardLayout>

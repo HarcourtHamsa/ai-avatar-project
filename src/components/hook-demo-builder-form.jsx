@@ -5,17 +5,25 @@ import Button from "./button";
 import GenerateHookModal from "./generate-hook-modal";
 import ChooseBackgroundMusic from "./choose-background-music";
 import { useRouter } from "next/navigation";
-import Input from "./input";
 import Spinner from "./spinner";
 import SwitchToggle from "./switch-toggle";
-import { PlusCircle } from "lucide-react";
+import { Mic, Play, Plus, Users, WandSparkles } from "lucide-react";
+import TagButton from "./tag-button";
+import { ICON_SIZE } from "@/constants";
+import SliderPanel from "./slider-panel";
+import womanKitchen from "../assets/img/woman-kitchen.png";
+import Image from "next/image";
+import AudioPlayer from "./audio-player";
 
 const hookPlacementData = ["Top", "Center", "Bottom"];
+
+const tagList = ["Text to Speech", "Speech to Speech"];
 
 const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
   const router = useRouter();
   const [selectedHookPlacement, setSelectedHookPlacement] = useState("Center");
   const [openGenerateHookModal, setOpenGenerateHookModal] = useState(false);
+  const [activeTag, setActiveTag] = useState("Text to Speech");
   const [videoUrl, setVideoUrl] = useState(
     "https://res.cloudinary.com/dgn6edv1k/video/upload/v1741272463/samples/cld-sample-video.mp4"
   );
@@ -41,7 +49,7 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
 
   return (
     <div>
-      <div className="border rounded-lg bg-white h-full px-4 sm:px-6 md:px-8 py-8 sm:py-10">
+      <div className="border rounded-lg bg-white h-full px-4 sm:px-6 md:px-7 py-8 sm:py-7">
         {isGeneratingVideo ? (
           <div className="min-h-[500px] flex flex-col items-center gap-6">
             <Spinner color="text-cOrange" size={200} />
@@ -50,90 +58,125 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
             </h2>
           </div>
         ) : (
-          <div className="border rounded-lg h-full px-4 sm:px-6 md:px-8 py-8 sm:py-10 flex flex-col lg:flex-row items-start justify-between w-full gap-10 lg:gap-12">
+          <div className="border rounded-lg h-full px-4 sm:px-6 md:px-6 py-4 sm:py-6 flex flex-col lg:flex-row items-start justify-between w-full gap-10 lg:gap-12">
             {/* LEFT FORM */}
-            <div className="flex-1 w-full flex flex-col gap-5 h-full">
-              <Input
-                label="1. Ad Title"
-                name="adTitle"
-                type="text"
-                value={formData.adTitle}
-                onChange={handleChange}
-                required
+            <div
+              style={{ flex: 2 }}
+              className="w-full flex flex-col gap-5 h-full"
+            >
+              <TagButton
+                list={tagList}
+                handleChange={setActiveTag}
+                active={activeTag}
               />
 
               {/* Hook Input */}
-              <div className="w-full flex flex-col gap-2.5">
-                <div className="flex items-center justify-between w-full">
-                  <h2 className="text-black font-medium text-sm">2. Hook</h2>
-                  <button
-                    onClick={() => setOpenGenerateHookModal(true)}
-                    className="text-cOrange text-sm font-medium"
-                  >
-                    Generate Hook
-                  </button>
-                </div>
-                <textarea
-                  className="bg-white text-cGray border py-2 px-3 rounded-lg w-full h-28 text-sm"
-                  placeholder="Type an Attention Grabbing Hook that will show on the Avatar"
-                />
-              </div>
+              {activeTag === "Text to Speech" && (
+                <div className="w-full flex flex-col gap-2.5">
+                  <h2 className="text-black font-medium text-sm sm:text-base">
+                    Video Script
+                  </h2>
 
-              {/* Hook Placement */}
-              <div className="w-full flex flex-col gap-2.5">
-                <h2 className="text-black font-medium text-sm">
-                  3. Hook Placement
-                </h2>
-                <div className="flex flex-wrap items-center gap-1 sm:gap-2.5 w-full">
-                  {hookPlacementData.map((placement, index) => (
-                    <button
-                      onClick={() => setSelectedHookPlacement(placement)}
-                      key={index}
-                      className={`w-fit ${
-                        selectedHookPlacement === placement
-                          ? "bg-cOrange"
-                          : "border "
-                      } rounded-xl py-2 px-4 flex items-center gap-2.5`}
-                    >
-                      <div
-                        className={`${
-                          selectedHookPlacement === placement
-                            ? "bg-white"
-                            : "border"
-                        } h-4 w-4 rounded-full`}
-                      />
-                      <p
-                        className={`${
-                          selectedHookPlacement === placement
-                            ? "text-white"
-                            : "text-cGray"
-                        } font-medium text-sm`}
-                      >
-                        {placement}
+                  <textarea
+                    className="bg-white text-cGray border border-gray-300 py-2 px-3 rounded-lg w-full h-28 text-sm sm:text-base"
+                    placeholder="Eg. Girl blinking, slight head movement, camera shake."
+                  />
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-2 sm:gap-0">
+                    <p className="text-[#475467] text-sm sm:text-base font-normal">
+                      Max. 2000 Chars
+                    </p>
+
+                    <button className="bg-cPink py-2.5 px-4 sm:px-6 rounded-lg flex items-center justify-center gap-2">
+                      <p className="text-white font-medium text-base sm:text-lg">
+                        Generate Script
                       </p>
+                      <WandSparkles size={20} color="white" />
                     </button>
-                  ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Demo Video Uploads */}
-              <div className="w-full flex flex-col gap-2.5 h-fit">
-                <h2 className="text-black font-medium text-sm">
-                  4. Demo Video
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 h-full gap-2 w-full">
-                  {[1].map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="flex-1 border border-cGray/30 rounded-xl h-36 sm:h-48 flex flex-col items-center justify-center cursor-pointer px-2"
-                    >
-                      <PlusCircle className="text-gray mb-2" />
-                      <p className="text-sm text-center text-cGray font-medium">
-                        Upload Demo Video
-                      </p>
+              {activeTag === "Speech to Speech" && (
+                <div className="flex flex-col gap-5">
+                  <div className="w-full flex flex-col gap-2.5">
+                    <h2 className="text-black font-medium text-sm">Product</h2>
+                    <div className="h-11 flex items-center gap-2.5">
+                      <select
+                        className="bg-white border border-[#D0D5DD] rounded-lg flex-1 h-full text-cGray text-base font-normal px-4"
+                        name=""
+                        id=""
+                      >
+                        <option value="">Select a Saved Product</option>
+                      </select>
+                      <button
+                        onClick={() => setOpenGenerateHookModal(true)}
+                        className="h-full w-11 border border-cGray/30 rounded-lg flex items-center justify-center"
+                      >
+                        <Plus color="#667085" size={ICON_SIZE} />
+                      </button>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="border border-cGray/30 w-full p-4 sm:p-5 rounded-lg">
+                    <div className="flex flex-col gap-3 sm:gap-2.5">
+                      <h2 className="text-black font-medium text-sm sm:text-base">
+                        Record or Upload your Voice
+                      </h2>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 w-full">
+                        <button className="bg-cOrange py-2.5 px-4 rounded-lg w-full sm:flex-1 h-11 flex items-center justify-center gap-2.5">
+                          <Mic size={ICON_SIZE} color="#fff" />
+                          <p className="text-white text-sm sm:text-base font-medium">
+                            Start Recording
+                          </p>
+                        </button>
+
+                        <p className="text-cGray text-sm sm:text-base font-medium text-center sm:text-left">
+                          -OR-
+                        </p>
+
+                        <button className="border border-cGray/30 py-2.5 px-4 rounded-lg w-full sm:flex-1 h-11 flex items-center justify-center gap-2.5">
+                          <Mic size={ICON_SIZE} color="#667085" />
+                          <p className="text-cGray text-sm sm:text-base font-medium">
+                            Upload Audio
+                          </p>
+                        </button>
+                      </div>
+
+                      <AudioPlayer src={"../assets/audio/sample.mp3"} />
+                    </div>
+                  </div>
                 </div>
+              )}
+
+              <div className="border border-[#6670854D] p-5 rounded-lg">
+                {activeTag === "Text to Speech" && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 mb-4 sm:h-14">
+                    <div className="relative h-14 w-14 rounded-full overflow-hidden mx-auto sm:mx-0">
+                      <Image
+                        src={womanKitchen}
+                        className="h-full w-full rounded-full object-cover"
+                        fill
+                        alt="Voiceover"
+                      />
+                    </div>
+
+                    <select
+                      className="bg-white border border-[#D0D5DD] rounded-lg w-full sm:w-56 h-12 sm:h-full text-cGray text-sm sm:text-base font-normal px-4"
+                      name=""
+                      id=""
+                    >
+                      <option value="">Violet (Default)</option>
+                    </select>
+
+                    <button className="bg-cOrange w-11 h-11 rounded-full flex items-center justify-center self-center sm:self-auto">
+                      <Play size={ICON_SIZE + 4} color="white" />
+                    </button>
+                  </div>
+                )}
+
+                <SliderPanel />
               </div>
 
               {/* Background Music */}
@@ -155,12 +198,28 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
             </div>
 
             {/* RIGHT PREVIEW PANEL */}
-            <div className="md:flex-1 h-[350px] w-[80%] md:w-inherit md:h-[550px] bg-red-500 border-4 border-cOrange rounded-xl flex items-center justify-center">
-              <video
-                src={videoUrl}
-                autoPlay
-                className="w-full h-full object-cover rounded-md"
-              />
+            <div className="w-full md:flex-1 max-w-[90%] md:max-w-full mx-auto">
+              <div className="h-[250px] sm:h-[350px] md:h-[550px] bg-red-500 border-4 border-cOrange rounded-xl flex items-center justify-center">
+                <video
+                  src={videoUrl}
+                  autoPlay
+                  className="w-full h-full object-cover rounded-md"
+                />
+              </div>
+
+              <div className="flex flex-col items-center justify-center mt-6 w-full">
+                <div className="flex items-center justify-between w-full text-sm sm:text-base">
+                  <p className="text-black">Violet</p>
+                  <span className="text-xs text-cGray bg-[#F2F2F2] px-2 py-1 rounded-full">
+                    HD
+                  </span>
+                </div>
+
+                <button className="flex items-center gap-2.5 bg-cBlack text-white font-medium text-base sm:text-lg rounded-lg px-5 sm:px-6 py-2 sm:py-2.5 mt-4 w-full sm:w-auto justify-center">
+                  <p>Change Avatar</p>
+                  <Users size={20} />
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -11,7 +11,7 @@ import UGCAdsList from "@/components/ugc-ad-list";
 const ugcAds = [
   {
     id: "84594t464-464rr34-9485",
-    title: "Ad for XYZ Brand",
+    title: "Shoes Campign",
     hook: " Unlock the power of AI to create stunning UGC ads in minutes.",
     createdAt: "2023-01-01",
     videoUrl:

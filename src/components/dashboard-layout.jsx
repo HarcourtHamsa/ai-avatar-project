@@ -137,7 +137,7 @@ const DashboardLayout = ({ children, label }) => {
           {/* Search + Profile (Desktop) */}
           <div className="hidden md:flex justify-between w-full items-center">
             {/* <SearchBar placeholder="Search" value="" onChange={() => { }} /> */}
-            <h2 className="font-medium">{label}</h2>
+            <p className="font-medium text-xl">{label}</p>
 
             <div className="flex items-center gap-3">
               <Notification count={0} />

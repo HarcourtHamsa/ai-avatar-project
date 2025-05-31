@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { EllipsisVertical, Play } from "lucide-react";
+import { CloudDownload, EllipsisVertical, Play, Repeat } from "lucide-react";
 import { ICON_SIZE } from "@/constants";
 import Modal from "@/components/modal";
 import Button from "./button";
@@ -81,16 +81,19 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {ugcAds.map((ad) => (
-          <div key={ad.id} className="p-2 bg-white border rounded-lg">
+          <div key={ad.id} className="rounded-lg">
             <div
               className={`relative h-[300px] border rounded-lg overflow-hidden cursor-pointer transition-shadow ${
                 selectedAdId === ad.id
                   ? "ring-4 ring-cOrange"
                   : "hover:shadow-lg"
               }`}
-              onClick={() => handleCardClick(ad.id)}
+              onClick={() => {
+                handleCardClick(ad.id);
+                handleOpenModal(ad);
+              }}
             >
               <video
                 ref={(el) => (videoRefs.current[ad.id] = el)}
@@ -101,45 +104,25 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
                 onPause={handlePause}
                 onEnded={handlePause}
               />
-
-              {playingAdId !== ad.id && (
-                <div
-                  className="absolute inset-0 flex justify-center items-center bg-black/40"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePlayClick(ad.id);
-                  }}
-                >
-                  <div className="w-12 h-12 rounded-full bg-white flex justify-center items-center">
-                    <Play className="text-cOrange" />
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="flex justify-between items-center mt-2">
               <div>
                 <p className="">{ad.title}</p>
-                <p className="text-xs text-gray-500">{ad.createdAt}</p>
               </div>
-              <EllipsisVertical
-                size={ICON_SIZE - 5}
-                className="cursor-pointer hover:opacity-50"
-                onClick={() => handleOpenModal(ad)}
-              />
             </div>
           </div>
         ))}
       </div>
 
       {modalAd && (
-        <Modal onClose={() => setModalAd(null)}>
-          <div className="p-4">
-            <div className="text-center">
-              <p>{modalAd.title}</p>
-              <p className="text-sm text-cOrange">AD Id: #{modalAd.id}</p>
-            </div>
-            <div className="relative md:w-[50%] w-[60%] m-auto rounded-lg overflow-hidden h-[300px] my-4">
+        <Modal
+          onClose={() => setModalAd(null)}
+          bg="bg-black"
+          width="w-[90%] md:w-[60%]"
+        >
+          <div className="flex flex-col md:flex-row gap-4 h-inherit items-start px-4 overflow-hidden h-[90vh] xl:h-[70vh]">
+            <div className="relative flex-1 rounded-lg overflow-hidden h-full w-full py-4">
               <video
                 ref={modalVideoRef}
                 src={modalAd.videoUrl}
@@ -156,21 +139,44 @@ const UGCAdsList = ({ ugcAds: initialAds }) => {
               </div>
             </div>
 
-            <p className="text-lg font-semibold">Hook: {modalAd.hook}</p>
-            <p className="text-sm text-gray-600 mb-6">
-              Uploaded: {modalAd.createdAt}
-            </p>
+            <div className="md:p-4 flex-1 space-y-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4">
+                <Button
+                  onClick={handleDownload}
+                  label={"Download Video"}
+                  icon={<CloudDownload />}
+                />
 
-            <div className="flex justify-between gap-2">
-              <Button onClick={handleDownload} label={"Download"} />
+                <Button
+                  onClick={handleDuplicate}
+                  label={"Remix Video"}
+                  theme="white"
+                  icon={<Repeat />}
+                />
+              </div>
 
-              <Button
-                onClick={handleDuplicate}
-                label={"Duplicate"}
-                theme="pink"
-              />
+              <div className="mt-8">
+                <p className="text-gray-400">Ad Name</p>
+                <p className="text-white">{modalAd.title}</p>
+              </div>
 
-              <Button onClick={handleDelete} label={"Delete"} theme="danger" />
+              <div className="">
+                <p className="text-gray-400">AI Actor</p>
+                <p className="text-white">Violet</p>
+              </div>
+
+              <div className="">
+                <p className="text-gray-400">Product</p>
+                <p className="text-white">Sparkly Water</p>
+              </div>
+              <div className="">
+                <p className="text-gray-400">Script</p>
+                <p className="text-white line-clamp-2 md:line-clamp-5">
+                  Tired of the same old water? Try Sparkly Water, the new way to
+                  stay hydrated. Sparkly Water is the perfect balance of taste
+                  and refreshment.
+                </p>
+              </div>
             </div>
           </div>
         </Modal>
