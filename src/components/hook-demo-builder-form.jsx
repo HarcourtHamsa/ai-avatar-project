@@ -16,18 +16,25 @@ import Image from "next/image";
 import AudioPlayer from "./audio-player";
 import { useGenerateVeoContent } from "@/app/hooks/use-generate-veo-content";
 import PercentageLoader from "./percentage-loader";
-
-const hookPlacementData = ["Top", "Center", "Bottom"];
+import {
+  convertBase64ToVideoUrl,
+  convertImageUrlToBase64,
+} from "@/utils/global";
+import { useFirestore } from "@/app/hooks/use-firestore";
+import useStore from "@/store";
 
 const tagList = ["Text to Speech", "Speech to Speech"];
 
 const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
   const router = useRouter();
-  const [selectedHookPlacement, setSelectedHookPlacement] = useState("Center");
+  const { avatar } = useStore();
+  const { addDocument } = useFirestore();
   const [openGenerateHookModal, setOpenGenerateHookModal] = useState(false);
   const [showPercentageLoader, setShowPercentageLoader] = useState(false);
   const [activeTag, setActiveTag] = useState("Text to Speech");
-  const [videoUrl, setVideoUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState(null);
+
+  const [isConverting, setIsConverting] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [formData, setFormData] = useState({
     prompt: "",
@@ -38,33 +45,49 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
       setShowPercentageLoader(true);
     },
     onSuccess: (data) => {
+      const videosObj = data.videos[0];
+      const url = convertBase64ToVideoUrl(videosObj.bytesBase64Encoded);
+      setVideoUrl(url);
       setShowPercentageLoader(false);
-      setVideoUrl(data.data.video_url);
     },
+
     onError: () => {
       setShowPercentageLoader(false);
     },
   });
 
-  const handleGenerateVideo = () => {
-    const payload = {
-      instances: [
-        {
-          prompt: formData.prompt,
-          image: {
-            gcsUri:
-              "https://res.cloudinary.com/deqfgp7hg/image/upload/v1748821458/avatar/man/pkdu5dqqroeblqf2hdek.jpg",
-            mimeType: "string",
-          },
-        },
-      ],
-      parameters: {
-        aspectRatio: "9:16",
-        durationSeconds: 20,
-      },
-    };
+  const handleGenerateVideo = async () => {
+    try {
+      setIsConverting(true);
 
-    mutate(payload);
+      const imageUrl = avatar?.avi;
+      const imageData = await convertImageUrlToBase64(imageUrl);
+
+      const payload = {
+        instances: [
+          {
+            prompt: formData.prompt,
+            image: {
+              bytesBase64Encoded: imageData.bytesBase64Encoded,
+              mimeType: imageData.mimeType,
+            },
+          },
+        ],
+        parameters: {
+          aspectRatio: "9:16",
+          sampleCount: 1,
+          durationSeconds: "8",
+          enablePromptRewriting: true,
+        },
+      };
+
+      // Your mutation call
+      mutate(payload);
+    } catch (error) {
+      console.error("Error generating video:", error);
+    } finally {
+      setIsConverting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -76,7 +99,7 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
   };
 
   const handlePercentageComplete = () => {
-    console.log("dONE");
+    console.log("Done");
   };
 
   return (
@@ -118,8 +141,8 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
                   />
 
                   {isError && (
-                    <p className="text-red-500 text-sm">
-                      {error?.response?.data?.message}
+                    <p className="text-red-500 px-4 py-2 bg-red-100 rounded-lg text-sm">
+                      {error?.message}
                     </p>
                   )}
 
@@ -128,7 +151,7 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
                       Max. 2000 Chars
                     </p>
 
-                    <div className="w-fit">
+                    <div className="md:w-fit">
                       <Button
                         label="Generate Script"
                         icon={<WandSparkles size={20} color="white" />}
@@ -243,8 +266,8 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
             </div>
 
             {/* RIGHT PREVIEW PANEL */}
-            <div className="w-full md:flex-1  md:max-w-full mx-auto">
-              {showPercentageLoader ? (
+            <div className="w-full flex-l mx-auto">
+              {showPercentageLoader && (
                 <div className="flex flex-col items-center justify-center">
                   <PercentageLoader
                     isActive={true}
@@ -252,19 +275,22 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
                     duration={160000}
                   />
                 </div>
-              ) : (
+              )}
+
+              {!showPercentageLoader && videoUrl && (
                 <div>
-                  <div className="h-[250px] sm:h-[350px] md:h-[550px] bg-red-500 border-4 border-cOrange rounded-xl flex items-center justify-center">
+                  <div className="w-[90%] max-w-md aspect-[9/16] bg-gray-100 border-4 border-cOrange rounded-xl flex items-center justify-center overflow-hidden">
                     <video
                       src={videoUrl}
                       autoPlay
+                      controls
                       className="w-full h-full object-cover rounded-md"
                     />
                   </div>
 
                   <div className="flex flex-col items-center justify-center mt-6 w-full">
                     <div className="flex items-center justify-between w-full text-sm sm:text-base">
-                      <p className="text-black">Violet</p>
+                      <p className="text-black">{avatar?.name}</p>
                       <span className="text-xs text-cGray bg-[#F2F2F2] px-2 py-1 rounded-full">
                         HD
                       </span>
@@ -274,6 +300,18 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
                       <p>Change Avatar</p>
                       <Users size={20} />
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {!showPercentageLoader && !videoUrl && (
+                <div className="flex flex-col flex-1 items-center justify-center">
+                  <div className="h-[37 0px] sm:h-[350px] md:h-[450px] rounded-xl flex items-center justify-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-gray-400 text-sm">
+                        Enter prompt to generate a video
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}

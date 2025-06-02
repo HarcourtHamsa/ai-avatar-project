@@ -2,12 +2,13 @@ export async function POST(request) {
   const PROJECT_ID = process.env.GCLOUD_PROJECT_ID;
   const MODEL_ID = process.env.VEO_MODEL_ID;
   const ACCESS_TOKEN = process.env.GCLOUD_ACCESS_TOKEN;
+  const API_URL = process.env.VEO_API_URL;
 
   const body = await request.json();
 
   try {
     const response = await fetch(
-      `https://us-central1-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/us-central1/publishers/google/models/${MODEL_ID}:fetchPredictOperation`,
+      `${API_URL}/${PROJECT_ID}/locations/us-central1/publishers/google/models/${MODEL_ID}:fetchPredictOperation`,
       {
         method: "POST",
         headers: {
@@ -17,6 +18,8 @@ export async function POST(request) {
         body: JSON.stringify(body),
       }
     );
+
+    console.log("API response: ", response);
 
     if (!response.ok) {
       const errorText = await response.text();

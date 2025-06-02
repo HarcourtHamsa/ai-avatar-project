@@ -1,4 +1,5 @@
 import { useFetchDefaultAvatars } from "@/app/hooks/use-fetch-default-avatars";
+import { AvatarSource } from "@/constants";
 import clsx from "clsx";
 import {
   Blend,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import useStore from "@/store";
 
 const GENDERS = ["male", "female"];
 
@@ -86,13 +88,10 @@ const ActorSelectionStep = () => {
   const [selectedBackground, setSelectedBackground] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [filters, setFilters] = useState({});
+  const { setAvatar } = useStore();
 
-  const {
-    isLoading: isFetchingDefaultAvatars,
-    isError,
-    error,
-    data: defaultAvatars,
-  } = useFetchDefaultAvatars();
+  const { isLoading: isFetchingDefaultAvatars, data: defaultAvatars } =
+    useFetchDefaultAvatars();
 
   // Mobile filter states
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -125,6 +124,13 @@ const ActorSelectionStep = () => {
       return avatar[key]?.toString().toLowerCase() === value.toLowerCase();
     });
   });
+
+  const handleUseDefaultAvatar = (avatar, source = AvatarSource.default) => {
+    setAvatar({
+      ...avatar,
+      source,
+    });
+  };
 
   const FilterSection = ({ title, children, sectionKey }) => (
     <div className="border-b border-gray-200 pb-2 mb-4">
@@ -463,13 +469,14 @@ const ActorSelectionStep = () => {
               <div
                 key={`default-${index}`}
                 className={clsx(
-                  "h-[200px] md:h-[230px] bg-gray-100 rounded-lg cursor-pointer transition-all relative overflow-hidden",
+                  "h-[200px] md:h-[270px] bg-gray-100 rounded-lg cursor-pointer transition-all relative overflow-hidden",
                   selectedAvatar === `default-${index}`
                     ? "border-2 border-orange-500 bg-orange-100"
                     : "bg-gray-300"
                 )}
                 onClick={() => {
                   setSelectedAvatar(`default-${index}`);
+                  handleUseDefaultAvatar(avatar);
                 }}
                 tabIndex={0}
               >

@@ -6,14 +6,6 @@ export async function POST(request) {
 
   const body = await request.json();
 
-  console.log({
-    API_URL,
-    PROJECT_ID,
-    MODEL_ID,
-    ACCESS_TOKEN,
-    body,
-  });
-
   try {
     const response = await fetch(
       `${API_URL}/${PROJECT_ID}/locations/us-central1/publishers/google/models/${MODEL_ID}:predictLongRunning`,
@@ -27,7 +19,7 @@ export async function POST(request) {
       }
     );
 
-    console.log({ response });
+    console.log("API response:", response);
 
     if (!response.ok) {
       const errorText = await response.text();

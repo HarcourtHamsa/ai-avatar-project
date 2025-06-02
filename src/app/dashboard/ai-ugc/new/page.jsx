@@ -9,7 +9,6 @@ import HookDemoBuilderForm from "@/components/hook-demo-builder-form";
 import VideoSetupStep from "@/components/video-setup-form";
 import ActorSelectionStep from "@/components/actor-selection-form";
 import ConfirmGenerationForm from "@/components/confirm-generation-form";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const STEPS = [
   { id: 0, label: "Video Setup" },
