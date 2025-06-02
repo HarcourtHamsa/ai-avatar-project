@@ -272,7 +272,7 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
                   <PercentageLoader
                     isActive={true}
                     onComplete={handlePercentageComplete}
-                    duration={190000}
+                    duration={300000}
                   />
                 </div>
               )}
