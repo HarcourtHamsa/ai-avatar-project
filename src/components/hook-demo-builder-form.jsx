@@ -272,19 +272,18 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
                   <PercentageLoader
                     isActive={true}
                     onComplete={handlePercentageComplete}
-                    duration={160000}
+                    duration={190000}
                   />
                 </div>
               )}
 
               {!showPercentageLoader && videoUrl && (
                 <div>
-                  <div className="w-[90%] max-w-md aspect-[9/16] bg-gray-100 border-4 border-cOrange rounded-xl flex items-center justify-center overflow-hidden">
+                  <div className="h-[390px] md:h-[470px] bg-gray-100 border-4 border-cOrange rounded-xl w-[90%] items-center justify-center">
                     <video
                       src={videoUrl}
                       autoPlay
-                      controls
-                      className="w-full h-full object-cover rounded-md"
+                      className="w-full h-full object-fill rounded-md"
                     />
                   </div>
 
