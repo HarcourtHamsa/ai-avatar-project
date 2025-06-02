@@ -20,6 +20,7 @@ export class QueryKeys {
 export class Collections {
   static avatars = "avatars";
   static savedAvatars = "saved_avatars";
+  static defaultAvatars = "default_avatars";
 }
 
 export class AvatarSource {

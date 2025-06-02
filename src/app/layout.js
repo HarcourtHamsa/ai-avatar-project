@@ -1,8 +1,8 @@
 import "./globals.css";
-// import { Karla } from "next/font/google";
+import { Roboto } from "next/font/google";
 import Providers from "./providers";
 
-// const font = Karla({ subsets: ["latin"] });
+const font = Roboto({ subsets: ["latin"], weight: ["400"] });
 
 export const metadata = {
   title: "AI avatar project",
@@ -12,7 +12,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`antialiased`}>
+      <body className={`${font.className} antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

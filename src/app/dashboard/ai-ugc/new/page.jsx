@@ -44,11 +44,10 @@ const Page = () => {
               label="Back"
               theme="pink"
               onClick={() => setCurrentStep((prev) => prev - 1)}
-              icon={<ArrowLeft />}
             />
           )}
 
-          <Button label="Next" onClick={handleNext} icon={<ArrowRight />} />
+          <Button label="Next" onClick={handleNext} />
         </div>
       </div>
     </DashboardLayout>

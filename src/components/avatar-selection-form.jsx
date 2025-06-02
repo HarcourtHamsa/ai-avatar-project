@@ -6,7 +6,7 @@ import { CloudUpload, X } from "lucide-react";
 import Button from "./button";
 import { AvatarSource, Collections, ICON_SIZE } from "@/constants";
 import Input from "./input";
-import { useFetchAvatars } from "@/app/hooks/use-fetch-avatars";
+import { useFetchAvatars } from "@/app/hooks/use-fetch-default-avatars";
 import Image from "next/image";
 import { useUploadAsset } from "@/app/hooks/use-upload-asset";
 import { useFetchSavedAvatars } from "@/app/hooks/use-fetch-saved-avatars";

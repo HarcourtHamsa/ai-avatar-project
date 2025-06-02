@@ -1,12 +1,18 @@
-"use client"
+"use client";
 
-import DashboardLayout from "@/components/dashboard-layout"
-
+import DashboardLayout from "@/components/dashboard-layout";
+import { useAddDefaultAvatars } from "../hooks/use-seed";
 
 const Page = () => {
-    return <DashboardLayout>
+  const {
+    mutate: generateDatabase,
+    isPending,
+    data,
+    error,
+    isError,
+  } = useAddDefaultAvatars();
 
-    </DashboardLayout>
-}
+  return <DashboardLayout></DashboardLayout>;
+};
 
-export default Page 
+export default Page;

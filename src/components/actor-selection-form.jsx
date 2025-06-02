@@ -1,3 +1,4 @@
+import { useFetchDefaultAvatars } from "@/app/hooks/use-fetch-default-avatars";
 import clsx from "clsx";
 import {
   Blend,
@@ -10,6 +11,7 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 
 const GENDERS = ["male", "female"];
@@ -83,6 +85,14 @@ const ActorSelectionStep = () => {
   const [selectedEthnicity, setSelectedEthnicity] = useState(null);
   const [selectedBackground, setSelectedBackground] = useState(null);
   const [selectedEmotion, setSelectedEmotion] = useState(null);
+  const [filters, setFilters] = useState({});
+
+  const {
+    isLoading: isFetchingDefaultAvatars,
+    isError,
+    error,
+    data: defaultAvatars,
+  } = useFetchDefaultAvatars();
 
   // Mobile filter states
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -101,6 +111,20 @@ const ActorSelectionStep = () => {
       [section]: !prev[section],
     }));
   };
+
+  const handleFilterChange = (filter, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filter]: value,
+    }));
+  };
+
+  const filteredAvatars = defaultAvatars?.filter((avatar) => {
+    return Object.entries(filters).every(([key, value]) => {
+      if (!value) return true;
+      return avatar[key]?.toString().toLowerCase() === value.toLowerCase();
+    });
+  });
 
   const FilterSection = ({ title, children, sectionKey }) => (
     <div className="border-b border-gray-200 pb-2 mb-4">
@@ -124,7 +148,7 @@ const ActorSelectionStep = () => {
     <div className="bg-white rounded-lg border">
       {/* Mobile Header with Filter Button */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold">Choose Your AI Actor</h2>
+        <h2 className="text-xl">Choose Your AI Actor</h2>
         <button
           onClick={() => setIsMobileFilterOpen(true)}
           className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -177,7 +201,10 @@ const ActorSelectionStep = () => {
                         selectedGender === gender &&
                           "bg-gray-200 border-gray-400"
                       )}
-                      onClick={() => setSelectedGender(gender)}
+                      onClick={() => {
+                        setSelectedGender(gender);
+                        handleFilterChange("gender", gender);
+                      }}
                     >
                       <span>{gender}</span>
                     </div>
@@ -195,7 +222,10 @@ const ActorSelectionStep = () => {
                         "flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 cursor-pointer border text-sm",
                         selectedAge === age && "bg-gray-200 border-gray-400"
                       )}
-                      onClick={() => setSelectedAge(age)}
+                      onClick={() => {
+                        setSelectedAge(age);
+                        handleFilterChange("age", age);
+                      }}
                     >
                       <span>{age}</span>
                     </div>
@@ -214,7 +244,10 @@ const ActorSelectionStep = () => {
                         selectedEthnicity === ethnicity &&
                           "bg-gray-200 border-gray-400"
                       )}
-                      onClick={() => setSelectedEthnicity(ethnicity)}
+                      onClick={() => {
+                        setSelectedEthnicity(ethnicity);
+                        handleFilterChange("ethnicity", ethnicity);
+                      }}
                     >
                       <span>{ethnicity}</span>
                     </div>
@@ -265,7 +298,7 @@ const ActorSelectionStep = () => {
             <div className="p-4 border-t border-gray-200">
               <button
                 onClick={() => setIsMobileFilterOpen(false)}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full bg-cPink text-white py-3 rounded-lg transition-colors"
               >
                 Apply Filters
               </button>
@@ -302,7 +335,10 @@ const ActorSelectionStep = () => {
                     "flex items-center px-2 py-2.5 rounded-lg hover:bg-gray-100 w-fit cursor-pointer border",
                     selectedGender === gender && "bg-gray-200"
                   )}
-                  onClick={() => setSelectedGender(gender)}
+                  onClick={() => {
+                    setSelectedGender(gender);
+                    handleFilterChange("gender", gender);
+                  }}
                 >
                   <span className="">{gender}</span>
                 </div>
@@ -321,7 +357,10 @@ const ActorSelectionStep = () => {
                     "flex items-center px-2 py-2.5 rounded-lg hover:bg-gray-100 w-fit cursor-pointer border",
                     selectedAge === age && "bg-gray-200"
                   )}
-                  onClick={() => setSelectedAge(age)}
+                  onClick={() => {
+                    setSelectedAge(age);
+                    handleFilterChange("age", age);
+                  }}
                 >
                   <span className="">{age}</span>
                 </div>
@@ -340,7 +379,10 @@ const ActorSelectionStep = () => {
                     "flex items-center px-2 py-2.5 rounded-lg hover:bg-gray-100 w-fit cursor-pointer border",
                     selectedEthnicity === ethnicity && "bg-gray-200"
                   )}
-                  onClick={() => setSelectedEthnicity(ethnicity)}
+                  onClick={() => {
+                    setSelectedEthnicity(ethnicity);
+                    handleFilterChange("ethnicity", ethnicity);
+                  }}
                 >
                   <span className="">{ethnicity}</span>
                 </div>
@@ -416,12 +458,12 @@ const ActorSelectionStep = () => {
           </div>
 
           {/* Avatar Grid - Responsive */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {Array.from({ length: 12 }).map((_, index) => (
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+            {filteredAvatars?.map((avatar, index) => (
               <div
                 key={`default-${index}`}
                 className={clsx(
-                  "h-[150px] md:h-[200px] bg-gray-200 rounded-lg cursor-pointer transition-all relative overflow-hidden",
+                  "h-[200px] md:h-[230px] bg-gray-100 rounded-lg cursor-pointer transition-all relative overflow-hidden",
                   selectedAvatar === `default-${index}`
                     ? "border-2 border-orange-500 bg-orange-100"
                     : "bg-gray-300"
@@ -430,8 +472,29 @@ const ActorSelectionStep = () => {
                   setSelectedAvatar(`default-${index}`);
                 }}
                 tabIndex={0}
-              ></div>
+              >
+                <Image
+                  src={avatar?.avi}
+                  alt={`Default Avatar ${index}`}
+                  fill
+                  className="object-cover rounded-md"
+                />
+              </div>
             ))}
+
+            {filteredAvatars?.length === 0 && (
+              <div className="col-span-full mt-4   h-[30vh] text-center text-gray-500 text-sm flex items-center justify-center">
+                <div>
+                  No avatars found for:{" "}
+                  <span className="font-medium">
+                    {Object.entries(filters)
+                      .filter(([_, value]) => value)
+                      .map(([_, value]) => value)
+                      .join(", ")}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
