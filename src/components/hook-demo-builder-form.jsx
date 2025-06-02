@@ -14,6 +14,8 @@ import SliderPanel from "./slider-panel";
 import womanKitchen from "../assets/img/woman-kitchen.png";
 import Image from "next/image";
 import AudioPlayer from "./audio-player";
+import { useGenerateVeoContent } from "@/app/hooks/use-generate-veo-content";
+import PercentageLoader from "./percentage-loader";
 
 const hookPlacementData = ["Top", "Center", "Bottom"];
 
@@ -23,28 +25,58 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
   const router = useRouter();
   const [selectedHookPlacement, setSelectedHookPlacement] = useState("Center");
   const [openGenerateHookModal, setOpenGenerateHookModal] = useState(false);
+  const [showPercentageLoader, setShowPercentageLoader] = useState(false);
   const [activeTag, setActiveTag] = useState("Text to Speech");
-  const [videoUrl, setVideoUrl] = useState(
-    "https://res.cloudinary.com/dgn6edv1k/video/upload/v1741272463/samples/cld-sample-video.mp4"
-  );
+  const [videoUrl, setVideoUrl] = useState("");
   const [isEnabled, setIsEnabled] = useState(false);
   const [formData, setFormData] = useState({
-    adTitle: "",
+    prompt: "",
+  });
+
+  const { isPending, error, isError, mutate } = useGenerateVeoContent({
+    onMutate: () => {
+      setShowPercentageLoader(true);
+    },
+    onSuccess: (data) => {
+      setShowPercentageLoader(false);
+      setVideoUrl(data.data.video_url);
+    },
+    onError: () => {
+      setShowPercentageLoader(false);
+    },
   });
 
   const handleGenerateVideo = () => {
-    setIsGeneratingVideo(true);
-    setTimeout(() => {
-      router.push("/dashboard/ai-ugc");
-    }, 5000);
+    const payload = {
+      instances: [
+        {
+          prompt: formData.prompt,
+          image: {
+            gcsUri:
+              "https://res.cloudinary.com/deqfgp7hg/image/upload/v1748821458/avatar/man/pkdu5dqqroeblqf2hdek.jpg",
+            mimeType: "string",
+          },
+        },
+      ],
+      parameters: {
+        aspectRatio: "9:16",
+        durationSeconds: 20,
+      },
+    };
+
+    mutate(payload);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: value,
     }));
+  };
+
+  const handlePercentageComplete = () => {
+    console.log("dONE");
   };
 
   return (
@@ -80,19 +112,32 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
                   <textarea
                     className="bg-white text-cGray border border-gray-300 py-2 px-3 rounded-lg w-full h-28 text-sm sm:text-base"
                     placeholder="Eg. Girl blinking, slight head movement, camera shake."
+                    name="prompt"
+                    value={formData.prompt}
+                    onChange={handleChange}
                   />
+
+                  {isError && (
+                    <p className="text-red-500 text-sm">
+                      {error?.response?.data?.message}
+                    </p>
+                  )}
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-2 sm:gap-0">
                     <p className="text-[#475467] text-sm sm:text-base font-normal">
                       Max. 2000 Chars
                     </p>
 
-                    <button className="bg-cPink py-2.5 px-4 sm:px-6 rounded-lg flex items-center justify-center gap-2">
-                      <p className="text-white font-medium text-base sm:text-lg">
-                        Generate Script
-                      </p>
-                      <WandSparkles size={20} color="white" />
-                    </button>
+                    <div className="w-fit">
+                      <Button
+                        label="Generate Script"
+                        icon={<WandSparkles size={20} color="white" />}
+                        theme="pink"
+                        onClick={handleGenerateVideo}
+                        isLoading={isPending}
+                        disabled={isPending}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -198,28 +243,40 @@ const HookDemoBuilderForm = ({ isGeneratingVideo, setIsGeneratingVideo }) => {
             </div>
 
             {/* RIGHT PREVIEW PANEL */}
-            <div className="w-full md:flex-1 max-w-[90%] md:max-w-full mx-auto">
-              <div className="h-[250px] sm:h-[350px] md:h-[550px] bg-red-500 border-4 border-cOrange rounded-xl flex items-center justify-center">
-                <video
-                  src={videoUrl}
-                  autoPlay
-                  className="w-full h-full object-cover rounded-md"
-                />
-              </div>
-
-              <div className="flex flex-col items-center justify-center mt-6 w-full">
-                <div className="flex items-center justify-between w-full text-sm sm:text-base">
-                  <p className="text-black">Violet</p>
-                  <span className="text-xs text-cGray bg-[#F2F2F2] px-2 py-1 rounded-full">
-                    HD
-                  </span>
+            <div className="w-full md:flex-1  md:max-w-full mx-auto">
+              {showPercentageLoader ? (
+                <div className="flex flex-col items-center justify-center">
+                  <PercentageLoader
+                    isActive={true}
+                    onComplete={handlePercentageComplete}
+                    duration={160000}
+                  />
                 </div>
+              ) : (
+                <div>
+                  <div className="h-[250px] sm:h-[350px] md:h-[550px] bg-red-500 border-4 border-cOrange rounded-xl flex items-center justify-center">
+                    <video
+                      src={videoUrl}
+                      autoPlay
+                      className="w-full h-full object-cover rounded-md"
+                    />
+                  </div>
 
-                <button className="flex items-center gap-2.5 bg-cBlack text-white font-medium text-base sm:text-lg rounded-lg px-5 sm:px-6 py-2 sm:py-2.5 mt-4 w-full sm:w-auto justify-center">
-                  <p>Change Avatar</p>
-                  <Users size={20} />
-                </button>
-              </div>
+                  <div className="flex flex-col items-center justify-center mt-6 w-full">
+                    <div className="flex items-center justify-between w-full text-sm sm:text-base">
+                      <p className="text-black">Violet</p>
+                      <span className="text-xs text-cGray bg-[#F2F2F2] px-2 py-1 rounded-full">
+                        HD
+                      </span>
+                    </div>
+
+                    <button className="flex items-center gap-2.5 bg-cBlack text-white font-medium text-base sm:text-lg rounded-lg px-5 sm:px-6 py-2 sm:py-2.5 mt-4 w-full sm:w-auto justify-center">
+                      <p>Change Avatar</p>
+                      <Users size={20} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

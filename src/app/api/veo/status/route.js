@@ -1,0 +1,62 @@
+export async function POST(request) {
+  const PROJECT_ID = process.env.GCLOUD_PROJECT_ID;
+  const MODEL_ID = process.env.VEO_MODEL_ID;
+  const ACCESS_TOKEN = process.env.GCLOUD_ACCESS_TOKEN;
+
+  const body = await request.json();
+
+  try {
+    const response = await fetch(
+      `https://us-central1-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/us-central1/publishers/google/models/${MODEL_ID}:fetchPredictOperation`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Failed to retrieve status",
+          error: errorText,
+        }),
+        {
+          status: response.status,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const data = await response.json();
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Status retrieved successfully",
+        data,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: error.message || "Unknown error",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+}
